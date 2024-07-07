@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "335390367826",
+    "project_id": "bluejobs-c524b",
+    "storage_bucket": "bluejobs-c524b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335390367826:android:d2eb8f0b5a48d8f12e7f8b",
+        "android_client_info": {
+          "package_name": "bluejobs.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBk0jdwR694dEErjEmTIQuq7YHXtaJb8nU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
