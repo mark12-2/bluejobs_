@@ -3,6 +3,7 @@ import 'package:bluejobs/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class PostsProvider with ChangeNotifier {
   final CollectionReference posts =
@@ -167,6 +168,26 @@ class PostsProvider with ChangeNotifier {
 
     await FirebaseFirestore.instance.collection('Posts').doc(postId).update({
       'applicants': FieldValue.arrayUnion([applicantId]),
+    });
+  }
+
+  Future<void> applyJob(String jobId, String jobTitle, String jobDescription,
+      String employerId, String employerName) async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final applicantRef = FirebaseFirestore.instance
+        .collection("users")
+        .doc(userId)
+        .collection("applications")
+        .doc(jobId);
+
+    await applicantRef.set({
+      "jobId": jobId,
+      "jobTitle": jobTitle,
+      "jobDescription": jobDescription,
+      "employerId": employerId,
+      "employerName": employerName,
+      "status": '',
+      "timestamp": Timestamp.now(),
     });
   }
 

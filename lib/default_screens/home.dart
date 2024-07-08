@@ -283,96 +283,109 @@ class _HomePageState extends State<HomePage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      children: [
-                                        InkWell(
-                                          onTap: () async {
-                                            final postId = post.id;
-                                            final userId =
-                                                auth.currentUser!.uid;
-
-                                            final postDoc =
-                                                await FirebaseFirestore.instance
-                                                    .collection('Posts')
-                                                    .doc(postId)
-                                                    .get();
-
-                                            if (postDoc.exists) {
-                                              final data = postDoc.data()
-                                                  as Map<String, dynamic>;
-
-                                              if (data.containsKey('likes')) {
-                                                final likes = (data['likes']
-                                                        as List<dynamic>)
-                                                    .map((e) => e as String)
-                                                    .toList();
-
-                                                if (likes.contains(userId)) {
-                                                  likes.remove(userId);
-                                                } else {
-                                                  likes.add(userId);
-                                                }
-
-                                                await postDoc.reference
-                                                    .update({'likes': likes});
-                                              } else {
-                                                await postDoc.reference.update({
-                                                  'likes': [userId]
-                                                });
-                                              }
-                                            }
-                                          },
-                                          child: Row(
+                                    role == 'Job Hunter'
+                                        ? Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
-                                              Icon(
-                                                Icons.thumb_up_alt_rounded,
-                                                color: post.data() != null &&
-                                                        (post.data() as Map<
-                                                                String,
-                                                                dynamic>)
-                                                            .containsKey(
-                                                                'likes') &&
-                                                        ((post.data() as Map<
-                                                                    String,
-                                                                    dynamic>)['likes']
-                                                                as List<
-                                                                    dynamic>)
-                                                            .contains(
-                                                                auth.currentUser!.uid)
-                                                    ? Colors.blue
-                                                    : Colors.grey,
+                                              InkWell(
+                                                onTap: () async {
+                                                  final postId = post.id;
+                                                  final userId =
+                                                      auth.currentUser!.uid;
+
+                                                  final postDoc =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection('Posts')
+                                                          .doc(postId)
+                                                          .get();
+
+                                                  if (postDoc.exists) {
+                                                    final data = postDoc.data()
+                                                        as Map<String, dynamic>;
+
+                                                    if (data
+                                                        .containsKey('likes')) {
+                                                      final likes = (data[
+                                                                  'likes']
+                                                              as List<dynamic>)
+                                                          .map((e) =>
+                                                              e as String)
+                                                          .toList();
+
+                                                      if (likes
+                                                          .contains(userId)) {
+                                                        likes.remove(userId);
+                                                      } else {
+                                                        likes.add(userId);
+                                                      }
+
+                                                      await postDoc.reference
+                                                          .update(
+                                                              {'likes': likes});
+                                                    } else {
+                                                      await postDoc.reference
+                                                          .update({
+                                                        'likes': [userId]
+                                                      });
+                                                    }
+                                                  }
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons
+                                                          .thumb_up_alt_rounded,
+                                                      color: post.data() != null &&
+                                                              (post.data() as Map<
+                                                                      String,
+                                                                      dynamic>)
+                                                                  .containsKey(
+                                                                      'likes') &&
+                                                              ((post.data() as Map<
+                                                                          String,
+                                                                          dynamic>)['likes']
+                                                                      as List<
+                                                                          dynamic>)
+                                                                  .contains(
+                                                                      auth.currentUser!.uid)
+                                                          ? Colors.blue
+                                                          : Colors.grey,
+                                                    ),
+                                                    const SizedBox(width: 5),
+                                                    Text(
+                                                      'React (${(post.data() as Map<String, dynamic>)['likes']?.length ?? 0})',
+                                                      style: CustomTextStyle
+                                                          .regularText,
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                'React (${(post.data() as Map<String, dynamic>)['likes']?.length ?? 0})',
-                                                style:
-                                                    CustomTextStyle.regularText,
+                                              const SizedBox(width: 25),
+                                              InkWell(
+                                                onTap: () {
+                                                  showCommentDialog(
+                                                      post.id, context);
+                                                },
+                                                child: const Row(
+                                                  children: [
+                                                    Icon(Icons.comment),
+                                                    SizedBox(width: 5),
+                                                    Text(
+                                                      'Comments',
+                                                      style: CustomTextStyle
+                                                          .regularText,
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
+                                              const SizedBox(
+                                                height: 50,
+                                              )
                                             ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 25),
-                                        InkWell(
-                                          onTap: () {
-                                            showCommentDialog(post.id, context);
-                                          },
-                                          child: const Row(
-                                            children: [
-                                              Icon(Icons.comment),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                'Comments',
-                                                style:
-                                                    CustomTextStyle.regularText,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 50,
-                                        )
-                                      ],
-                                    ),
+                                          )
+                                        : Container(),
                                     const SizedBox(width: 5),
                                     userId == auth.currentUser!.uid
                                         ? Container()
@@ -420,6 +433,18 @@ class _HomePageState extends State<HomePage> {
                                                               notif:
                                                                   ', applied to your job entitled "$title"',
                                                             );
+                                                            await Provider.of<
+                                                                        PostsProvider>(
+                                                                    context,
+                                                                    listen:
+                                                                        false)
+                                                                .applyJob(
+                                                              post.id,
+                                                              title,
+                                                              description,
+                                                              userId,
+                                                              name,
+                                                            );
 
                                                             // Save the applicant's information to the job post
                                                             await Provider.of<
@@ -446,7 +471,7 @@ class _HomePageState extends State<HomePage> {
                                                           },
                                                     child: Container(
                                                       height: 53,
-                                                      width: 105,
+                                                      width: 165,
                                                       decoration: BoxDecoration(
                                                         border: Border.all(
                                                           color: isApplied

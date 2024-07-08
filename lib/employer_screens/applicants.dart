@@ -136,7 +136,7 @@ class _ApplicantsPageState extends State<ApplicantsPage> {
       senderId: _auth.currentUser!.uid,
       senderName: _auth.currentUser!.displayName ?? '',
       title: 'Job Update',
-      notif: 'You have been hired for the job',
+      notif: ' ,you have been hired for the job',
     );
 
     print('Hiring $applicantId and sending a notification');

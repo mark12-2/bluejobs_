@@ -6,6 +6,7 @@ import 'package:bluejobs/screens_for_auth/signup.dart';
 import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
+import 'package:bluejobs/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +21,7 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
-  final bool isLoading = false;
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -31,6 +32,8 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveUtils(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 7, 30, 47),
@@ -38,7 +41,8 @@ class _SignInPageState extends State<SignInPage> {
       backgroundColor: const Color.fromARGB(255, 19, 52, 77),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
+          padding: EdgeInsets.symmetric(
+              horizontal: responsive.horizontalPadding(0.05)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -48,8 +52,9 @@ class _SignInPageState extends State<SignInPage> {
                   color: Colors.white,
                   fontSize: responsiveSize(context, 0.03),
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: responsive.verticalPadding(0.02)),
               Text(
                 'Sign in Your Account',
                 style: CustomTextStyle.semiBoldText.copyWith(
@@ -57,7 +62,7 @@ class _SignInPageState extends State<SignInPage> {
                   fontSize: responsiveSize(context, 0.03),
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: responsive.verticalPadding(0.01)),
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -68,7 +73,7 @@ class _SignInPageState extends State<SignInPage> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: responsive.verticalPadding(0.02)),
               TextField(
                 controller: _passwordController,
                 obscureText: _obscureText,
@@ -91,9 +96,9 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(left: 220.0),
+              SizedBox(height: responsive.verticalPadding(0.02)),
+              Align(
+                alignment: Alignment.centerRight,
                 child: InkWell(
                   onTap: () {
                     Navigator.push(
@@ -112,64 +117,65 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: responsive.verticalPadding(0.02)),
               CustomButton(
                 onPressed: () async {
+                  setState(() {
+                    isLoading = true;
+                  });
                   try {
-                    final ap = Provider.of<AuthProvider>(context, listen: false);
-                    await Provider.of<AuthProvider>(context, listen: false)
-                        .signInWithEmailAndPassword(
+                    final ap =
+                        Provider.of<AuthProvider>(context, listen: false);
+                    await ap.signInWithEmailAndPassword(
                       email: _emailController.text,
                       password: _passwordController.text,
                     );
                     ap.checkExistingUser().then((value) async {
-          if (value == true) {
-            ap.getDataFromFirestore().then(
-              (userData) async {
-                await ap.saveUserDataToSP();
-                await ap.setSignIn();
+                      if (value == true) {
+                        await ap.getDataFromFirestore();
+                        await ap.saveUserDataToSP();
+                        await ap.setSignIn();
 
-                // Fetch the user's role from the fetched data
-                String role = ap.userModel.role;
+                        // Fetch the user's role from the fetched data
+                        String role = ap.userModel.role;
 
-                // Navigate to the designated page based on the role
-                if (role == 'Employer') {
-                  if (isLoading == true) {
-                    CircularProgressIndicator();
-                  } else {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EmployerNavigation(),
-                      ),
-                      (route) => false,
-                    );
-                  }
-                } else if (role == 'Job Hunter') {
-                  if (isLoading == true) {
-                    CircularProgressIndicator();
-                  } else {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const JobhunterNavigation(),
-                      ),
-                      (route) => false,
-                    );
-                  }
-                }
-              },
-            );
-            }
+                        // Navigate to the designated page based on the role
+                        if (role == 'Employer') {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EmployerNavigation(),
+                            ),
+                            (route) => false,
+                          );
+                        } else if (role == 'Job Hunter') {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const JobhunterNavigation(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      }
                     });
                   } catch (e) {
-                    // Handle the error
-                    print(e);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Invalid email address or password!'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } finally {
+                    setState(() {
+                      isLoading = false;
+                    });
                   }
                 },
                 buttonText: 'Sign In',
               ),
-              const SizedBox(height: 20),
+              if (isLoading) const CircularProgressIndicator(),
+              SizedBox(height: responsive.verticalPadding(0.02)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

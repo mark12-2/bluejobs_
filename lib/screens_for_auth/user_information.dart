@@ -4,6 +4,7 @@ import 'package:bluejobs/model/user_model.dart';
 import 'package:bluejobs/navigation/employer_navigation.dart';
 import 'package:bluejobs/navigation/jobhunter_navigation.dart';
 import 'package:bluejobs/provider/auth_provider.dart';
+import 'package:bluejobs/screens_for_auth/confetti.dart';
 import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/custom_theme.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
@@ -377,60 +378,6 @@ class _UserInformationState extends State<UserInformation> {
                             buttonText: "Continue",
                             onPressed: () {
                               storeData();
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return Dialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    elevation: 15,
-                                    child: Container(
-                                      height: 150,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          ConfettiWidget(
-                                            confettiController: _confettiKey,
-                                            blastDirectionality:
-                                                BlastDirectionality.explosive,
-                                            colors: const [
-                                              Colors.orange,
-                                              Color.fromARGB(255, 7, 30, 47),
-                                              Colors.white,
-                                            ],
-                                          ),
-                                          const SizedBox(height: 15),
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Align(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                    "Welcome to BlueJobs!",
-                                                    style: CustomTextStyle
-                                                        .titleText
-                                                        .copyWith(
-                                                            fontSize:
-                                                                responsiveSize(
-                                                                    context,
-                                                                    0.05))),
-                                              )),
-                                          const SizedBox(height: 20),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Get Started'),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                              _confettiKey.play();
                             },
                           ),
                         ),
@@ -447,11 +394,33 @@ class _UserInformationState extends State<UserInformation> {
   // storing data function
   void storeData() async {
     final ap = Provider.of<AuthProvider>(context, listen: false);
-    if (_nameController.text.isEmpty ||
-        _roleSelection == null ||
-        _birthdayController.text.isEmpty ||
-        _address == null) {
-      showSnackBar(context, "Please fill in all fields...");
+
+    if (image == null) {
+      showSnackBar(context, "Please upload your profile photo");
+      return;
+    }
+    if (_nameController.text.isEmpty) {
+      showSnackBar(context, "Please enter your full name");
+      return;
+    }
+    if (_phoneController.text.isEmpty) {
+      showSnackBar(context, "Please enter your phone number");
+      return;
+    }
+    if (_sex == null) {
+      showSnackBar(context, "Please select your sex");
+      return;
+    }
+    if (_birthdayController.text.isEmpty) {
+      showSnackBar(context, "Please enter your birthday");
+      return;
+    }
+    if (_address == null) {
+      showSnackBar(context, "Please enter your address");
+      return;
+    }
+    if (_roleSelection == null) {
+      showSnackBar(context, "Please select your role, this is Important!");
       return;
     }
 
@@ -468,39 +437,22 @@ class _UserInformationState extends State<UserInformation> {
       uid: ap.uid,
     );
 
-    if (image != null) {
-      ap.saveUserDataToFirebase(
-        context: context,
-        userModel: userModel,
-        profilePic: image!,
-        onSuccess: () {
-          ap.saveUserDataToSP().then((value) {
-            ap.setSignIn();
-            String role = ap.userModel.role;
-
-            // Navigate to the designated page based on the role
-            if (role == 'Employer') {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EmployerNavigation(),
-                ),
-                (route) => false,
-              );
-            } else if (role == 'Job Hunter') {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const JobhunterNavigation(),
-                ),
-                (route) => false,
-              );
-            }
-          });
-        },
-      );
-    } else {
-      showSnackBar(context, "Please upload your profile photo");
-    }
+ap.saveUserDataToFirebase(
+    context: context,
+    userModel: userModel,
+    profilePic: image!,
+    onSuccess: () {
+      ap.saveUserDataToSP().then((value) {
+        ap.setSignIn();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const DoneCreatePage(),
+          ),
+          (route) => false,
+        );
+      });
+    },
+  );
   }
 }

@@ -38,7 +38,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
     final userLoggedIn =
         Provider.of<auth_provider.AuthProvider>(context, listen: false);
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           actions: [
@@ -178,6 +178,10 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
             ),
             Container(
               width: MediaQuery.of(context).size.width / 3,
+              child: const Tab(text: 'Applications'),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width / 3,
               child: const Tab(text: 'About'),
             ),
           ],
@@ -191,6 +195,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
         children: [
           buildMyPostsTab(),
           buildResumeTab(),
+          buildApplicationsTab(),
           Center(child: Text('About')),
         ],
       );
@@ -411,7 +416,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                 children: [
                   buildResumeItem('Name', userLoggedIn.userModel.name),
                   buildResumeItem('Sex', userLoggedIn.userModel.sex),
-                   buildResumeItem('Birthday', userLoggedIn.userModel.birthdate),
+                  buildResumeItem('Birthday', userLoggedIn.userModel.birthdate),
                   buildResumeItem(
                       'Contacts', userLoggedIn.userModel.phoneNumber),
                   buildResumeItem('Email', userLoggedIn.userModel.email ?? ''),
@@ -488,4 +493,91 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
       ),
     );
   }
+
+  Widget buildApplicationsTab() {
+    final userLoggedIn =
+        Provider.of<auth_provider.AuthProvider>(context, listen: false);
+    final PostsProvider _postsProvider = PostsProvider();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: getApplicationsStream(userLoggedIn.uid),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        }
+
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          default:
+            if (snapshot.hasData) {
+              final applicationsData = snapshot.data!.docs;
+
+              if (applicationsData.isEmpty) {
+                return Center(
+                  child: Text('No applications found.'),
+                );
+              }
+              return ListView.builder(
+                  itemCount: applicationsData.length,
+                  itemBuilder: (context, index) {
+                    final applicationData =
+                        applicationsData[index].data() as Map<String, dynamic>;
+
+                    return Card(
+                      child: ListTile(
+                        title: Text(applicationData['jobTitle']),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(applicationData['jobDescription']),
+                            Text('Employer: ${applicationData['employerName']}',
+                                style: CustomTextStyle.roleRegularText),
+                          ],
+                        ),
+                        trailing: AbsorbPointer(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await _postsProvider.updateApplicantStatus(
+                                applicationData['jobId'],
+                                applicationData['idOfApplicant'],
+                                applicationData['isHired'],
+                              );
+
+                              // Refresh the StreamBuilder
+                              snapshot.data!.docs[index].reference
+                                  .get()
+                                  .then((value) {
+                                setState(() {});
+                              });
+                            },
+                            child: Text(applicationData['status'] == ''
+                                ? 'Pending'
+                                : applicationData['status']),
+                          ),
+                        ),
+                      ),
+                    );
+                  });
+            } else {
+              return Center(
+                child: Text('No data available.'),
+              );
+            }
+        }
+      },
+    );
+  }
+}
+
+Stream<QuerySnapshot> getApplicationsStream(String uid) {
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('applications')
+      .snapshots();
 }

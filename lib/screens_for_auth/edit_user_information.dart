@@ -26,6 +26,7 @@ class _EditUserInformationState extends State<EditUserInformation> {
   String? _address;
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
+  final authProvider = AuthProvider();
 
   bool _isNameFocused = false;
   bool _isEmailFocused = false;
@@ -240,6 +241,13 @@ class _EditUserInformationState extends State<EditUserInformation> {
                                 Navigator.of(context).pop();
                               },
                             ),
+                          ),
+                          const SizedBox(height: 15),
+                          ElevatedButton(
+                            onPressed: () {
+                              authProvider.initiateUserDeletion(context);
+                            },
+                            child: Text('Delete Account'),
                           ),
                           const SizedBox(height: 400),
                         ],
