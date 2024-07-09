@@ -20,22 +20,27 @@ class EditUserInformation extends StatefulWidget {
 
 class _EditUserInformationState extends State<EditUserInformation> {
   File? image;
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _middleNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _suffixController = TextEditingController();
   final _birthdayController = TextEditingController();
   String? _address;
-  final FocusNode _nameFocusNode = FocusNode();
-  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _firstNameFocusNode = FocusNode();
+  final FocusNode _middleNameFocusNode = FocusNode();
+  final FocusNode _lastNameFocusNode = FocusNode();
+  final FocusNode _suffixFocusNode = FocusNode();
   final authProvider = AuthProvider();
 
-  bool _isNameFocused = false;
-  bool _isEmailFocused = false;
+  bool _isSuffixFocused = false;
 
   @override
   void dispose() {
     super.dispose();
-    _nameController.dispose();
-    _emailController.dispose();
+    _firstNameController.dispose();
+    _middleNameController.dispose();
+    _lastNameController.dispose();
+    _suffixController.dispose();
     _birthdayController.dispose();
   }
 
@@ -44,19 +49,22 @@ class _EditUserInformationState extends State<EditUserInformation> {
     super.initState();
     final ap = Provider.of<AuthProvider>(context, listen: false);
     if (ap.isSignedIn) {
-      _nameController.text = ap.userModel.name;
-      _emailController.text = ap.userModel.email ?? '';
+      _firstNameController.text = ap.userModel.firstName;
+      _middleNameController.text = ap.userModel.middleName;
+      _lastNameController.text = ap.userModel.lastName;
+      _suffixController.text = ap.userModel.suffix;
       _address = ap.userModel.address;
       image = File(ap.userModel.profilePic ?? '');
     }
-    _nameFocusNode.addListener(_onFocusChange);
-    _emailFocusNode.addListener(_onFocusChange);
+    _firstNameFocusNode.addListener(_onFocusChange);
+    _middleNameFocusNode.addListener(_onFocusChange);
+    _lastNameFocusNode.addListener(_onFocusChange);
+    _suffixFocusNode.addListener(_onFocusChange);
   }
 
   void _onFocusChange() {
     setState(() {
-      _isNameFocused = _nameFocusNode.hasFocus;
-      _isEmailFocused = _emailFocusNode.hasFocus;
+      _isSuffixFocused = _suffixFocusNode.hasFocus;
     });
   }
 
@@ -119,34 +127,42 @@ class _EditUserInformationState extends State<EditUserInformation> {
                       child: ListBody(
                         children: [
                           TextField(
-                            controller: _nameController,
-                            focusNode: _nameFocusNode,
-                            decoration: customInputDecoration('Full Name'),
+                            // first name input
+                            controller: _firstNameController,
+                            focusNode: _firstNameFocusNode,
+                            decoration: customInputDecoration('First Name'),
                           ),
-                          if (_isNameFocused)
+                          const SizedBox(height: 20),
+                          TextField(
+                            // last name input
+                            controller: _lastNameController,
+                            focusNode: _lastNameFocusNode,
+                            decoration: customInputDecoration('Last Name'),
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            // middle name input
+                            controller: _middleNameController,
+                            focusNode: _middleNameFocusNode,
+                            decoration:
+                                customInputDecoration('Middle Name (Optional)'),
+                          ),
+                          TextField(
+                            // suffix input
+                            controller: _suffixController,
+                            focusNode: _suffixFocusNode,
+                            decoration:
+                                customInputDecoration('Suffix (Optional)'),
+                          ),
+                          if (_isSuffixFocused)
                             const Padding(
                               padding: EdgeInsets.only(top: 8.0),
                               child: Text(
-                                'Enter your full name. Ex. Juan A. Dela CRUZ',
+                                'Suffixes: Sr., Jr., II, III,  etc.',
                                 style:
                                     TextStyle(color: Colors.grey, fontSize: 12),
                               ),
                             ),
-                          const SizedBox(height: 20),
-                          // TextField(
-                          //   controller: _emailController,
-                          //   focusNode: _emailFocusNode,
-                          //   decoration: customInputDecoration('Email'),
-                          // ),
-                          // if (_isEmailFocused)
-                          //   const Padding(
-                          //     padding: EdgeInsets.only(top: 8.0),
-                          //     child: Text(
-                          //       'Use an active email',
-                          //       style:
-                          //           TextStyle(color: Colors.grey, fontSize: 12),
-                          //     ),
-                          //   ),
                           const SizedBox(height: 15),
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
@@ -263,9 +279,18 @@ class _EditUserInformationState extends State<EditUserInformation> {
   void storeData() async {
     final ap = Provider.of<AuthProvider>(context, listen: false);
 
-    String? name = _nameController.text.trim().isEmpty
+    String? firstName = _firstNameController.text.trim().isEmpty
         ? null
-        : _nameController.text.trim();
+        : _firstNameController.text.trim();
+    String? middleName = _middleNameController.text.trim().isEmpty
+        ? null
+        : _middleNameController.text.trim();
+    String? lastName = _lastNameController.text.trim().isEmpty
+        ? null
+        : _lastNameController.text.trim();
+    String? suffix = _suffixController.text.trim().isEmpty
+        ? null
+        : _suffixController.text.trim();
     String? address =
         _address?.trim().isEmpty ?? true ? null : _address?.trim();
     image = image ?? null;
@@ -273,7 +298,10 @@ class _EditUserInformationState extends State<EditUserInformation> {
     await ap.updateUserData(
       context: context,
       uid: ap.uid,
-      name: name,
+      firstName: firstName,
+      middleName: middleName,
+      lastName: lastName,
+      suffix: suffix,
       address: address,
       profilePic: image,
       onSuccess: () {

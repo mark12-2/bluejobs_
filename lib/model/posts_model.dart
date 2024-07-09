@@ -6,6 +6,10 @@ class Post {
   String? location;
   String? rate;
   String? ownerId;
+  String? numberOfWorkers;
+  String? startDate;
+  String? endDate;
+  String? workingHours;
 
   Post({
     this.id,
@@ -15,6 +19,10 @@ class Post {
     this.location,
     this.rate,
     this.ownerId,
+    this.numberOfWorkers,
+    this.startDate,
+    this.endDate,
+    this.workingHours,
   });
 
   factory Post.fromMap(Map<String, dynamic> map) {
@@ -26,8 +34,13 @@ class Post {
       location: map['location'],
       rate: map['rate'],
       ownerId: map['ownerId'],
+      numberOfWorkers: map['numberOfWorkers'],
+      startDate: map['startDate'],
+      endDate: map['endDate'],
+      workingHours: map['workingHours'],
     );
   }
+
   Map<String, dynamic> toMap() {
     return {
       'title': title,
@@ -35,7 +48,11 @@ class Post {
       'type': type,
       'location': location,
       'rate': rate,
+      'ownerId': ownerId,
+      'numberOfWorkers': numberOfWorkers,
+      'startDate': startDate,
+      'endDate': endDate,
+      'workingHours': workingHours,
     };
   }
-
 }

@@ -4,6 +4,7 @@ import 'package:bluejobs/screens_for_auth/user_information.dart';
 import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
+import 'package:bluejobs/utils/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,30 +32,27 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveUtils(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 7, 30, 47),
       ),
-      backgroundColor: const Color.fromARGB(255, 19, 52, 77),
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
+            padding: EdgeInsets.symmetric(
+                horizontal: responsive.horizontalPadding(0.05)),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Create an Account.",
-                          style: CustomTextStyle.semiBoldTextWhite.copyWith(
-                              fontSize: responsiveSize(context, 0.05))),
-                    )),
-                const SizedBox(
-                  height: 20,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Create an Account.",
+                      style: CustomTextStyle.semiBoldText
+                          .copyWith(fontSize: responsiveSize(context, 0.05))),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: responsive.verticalPadding(0.04)),
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -65,7 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: responsive.verticalPadding(0.02)),
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscureText,
@@ -88,7 +86,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: responsive.verticalPadding(0.02)),
                 TextField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureText,
@@ -111,7 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: responsive.verticalPadding(0.05)),
                 CustomButton(
                   onPressed: () async {
                     if (_passwordController.text ==
@@ -176,7 +174,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Text(
                         "Already have an account? Sign In",
                         style: CustomTextStyle.regularText.copyWith(
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ),

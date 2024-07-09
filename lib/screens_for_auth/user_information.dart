@@ -1,16 +1,14 @@
 import 'dart:io';
 import 'package:bluejobs/dropdowns/addresses.dart';
 import 'package:bluejobs/model/user_model.dart';
-import 'package:bluejobs/navigation/employer_navigation.dart';
-import 'package:bluejobs/navigation/jobhunter_navigation.dart';
 import 'package:bluejobs/provider/auth_provider.dart';
 import 'package:bluejobs/screens_for_auth/confetti.dart';
 import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/custom_theme.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
+import 'package:bluejobs/utils/responsive_utils.dart';
 import 'package:bluejobs/utils/utils.dart';
-import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -26,28 +24,35 @@ class UserInformation extends StatefulWidget {
 }
 
 class _UserInformationState extends State<UserInformation> {
-  final ConfettiController _confettiKey =
-      ConfettiController(duration: const Duration(seconds: 10));
   File? image;
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _middleNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _suffixController = TextEditingController();
   final _phoneController = TextEditingController();
   String? _roleSelection;
   String? _sex;
   final _birthdayController = TextEditingController();
   String? _address;
   // focus node - name and email
-  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _firstNameFocusNode = FocusNode();
+  final FocusNode _middleNameFocusNode = FocusNode();
+  final FocusNode _lastNameFocusNode = FocusNode();
+  final FocusNode _suffixFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   // birthdate
   final FocusNode _birthdayFocusNode = FocusNode();
   DateTime? _selectedDate;
 
-  bool _isNameFocused = false;
+  bool _isSuffixFocused = false;
 
   @override
   void dispose() {
     super.dispose();
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _middleNameController.dispose();
+    _lastNameController.dispose();
+    _suffixController.dispose();
     _phoneController.dispose();
     _birthdayController.dispose();
     _birthdayFocusNode.dispose();
@@ -57,7 +62,10 @@ class _UserInformationState extends State<UserInformation> {
   void initState() {
     super.initState();
     // Listen for focus changes
-    _nameFocusNode.addListener(_onFocusChange);
+    _firstNameFocusNode.addListener(_onFocusChange);
+    _middleNameFocusNode.addListener(_onFocusChange);
+    _lastNameFocusNode.addListener(_onFocusChange);
+    _suffixFocusNode.addListener(_onFocusChange);
     _emailFocusNode.addListener(_onFocusChange);
     _roleSelection = null;
     _address = null;
@@ -65,7 +73,7 @@ class _UserInformationState extends State<UserInformation> {
 
   void _onFocusChange() {
     setState(() {
-      _isNameFocused = _nameFocusNode.hasFocus;
+      _isSuffixFocused = _suffixFocusNode.hasFocus;
     });
   }
 
@@ -81,7 +89,7 @@ class _UserInformationState extends State<UserInformation> {
       setState(() {
         _selectedDate = pickedDate;
         _birthdayController.text =
-            DateFormat('yyyy-MM-dd').format(_selectedDate!);
+            DateFormat('MM-dd-yyyy').format(_selectedDate!);
       });
     }
   }
@@ -96,8 +104,12 @@ class _UserInformationState extends State<UserInformation> {
   Widget build(BuildContext context) {
     final isLoading =
         Provider.of<AuthProvider>(context, listen: true).isLoading;
+    final responsive = ResponsiveUtils(context);
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color.fromARGB(255, 7, 30, 47),
+        ),
         body: SafeArea(
           child: isLoading == true
               ? const Center(
@@ -107,20 +119,18 @@ class _UserInformationState extends State<UserInformation> {
                 )
               : SingleChildScrollView(
                   child: Column(children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    SizedBox(height: responsive.verticalPadding(0.03)),
                     Padding(
-                        padding: const EdgeInsets.only(left: 20),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: responsive.horizontalPadding(0.05)),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text("Let's set up your account.",
                               style: CustomTextStyle.semiBoldText.copyWith(
                                   fontSize: responsiveSize(context, 0.05))),
                         )),
-                    const SizedBox(
-                      height: 20,
-                    ),
+
+                    SizedBox(height: responsive.verticalPadding(0.03)),
                     // circle avatar
                     InkWell(
                       onTap: () => selectImage(),
@@ -139,6 +149,7 @@ class _UserInformationState extends State<UserInformation> {
                               radius: 50,
                             ),
                     ),
+
                     const Padding(
                       padding: EdgeInsets.only(top: 8.0),
                       child: Text(
@@ -146,30 +157,59 @@ class _UserInformationState extends State<UserInformation> {
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ),
-                    const SizedBox(
-                      height: 5,
-                    ),
+
+                    SizedBox(height: responsive.verticalPadding(0.03)),
+
                     Padding(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: responsive.horizontalPadding(0.04)),
                       child: ListBody(children: [
                         TextField(
-                          // name input
-                          controller: _nameController,
-                          focusNode: _nameFocusNode,
-                          decoration: customInputDecoration('Full Name'),
+                          // first name input
+                          controller: _firstNameController,
+                          focusNode: _firstNameFocusNode,
+                          decoration: customInputDecoration('First Name'),
                         ),
-                        if (_isNameFocused)
+
+                        SizedBox(height: responsive.verticalPadding(0.02)),
+
+                        TextField(
+                          // last name input
+                          controller: _lastNameController,
+                          focusNode: _lastNameFocusNode,
+                          decoration: customInputDecoration('Last Name'),
+                        ),
+
+                        SizedBox(height: responsive.verticalPadding(0.02)),
+
+                        TextField(
+                          // middle name input
+                          controller: _middleNameController,
+                          focusNode: _middleNameFocusNode,
+                          decoration:
+                              customInputDecoration('Middle Name (Optional)'),
+                        ),
+
+                        SizedBox(height: responsive.verticalPadding(0.02)),
+
+                        TextField(
+                          // suffix input
+                          controller: _suffixController,
+                          focusNode: _suffixFocusNode,
+                          decoration:
+                              customInputDecoration('Suffix (Optional)'),
+                        ),
+                        if (_isSuffixFocused)
                           const Padding(
                             padding: EdgeInsets.only(top: 8.0),
                             child: Text(
-                              'Enter your full name. Ex. Juan A. Dela CRUZ',
+                              'Suffixes: Sr., Jr., II, III,  etc.',
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 12),
                             ),
                           ),
-                        const SizedBox(
-                          height: 20,
-                        ),
+
+                        SizedBox(height: responsive.verticalPadding(0.02)),
 
                         IntlPhoneField(
                           decoration: customInputDecoration('Phone Number'),
@@ -181,7 +221,8 @@ class _UserInformationState extends State<UserInformation> {
 
                         // sex input
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: responsive.horizontalPadding(0.04)),
                           child: Column(
                             children: [
                               const Row(
@@ -223,7 +264,7 @@ class _UserInformationState extends State<UserInformation> {
 
                         // birthdate input
                         Padding(
-                          padding: const EdgeInsets.only(top: 5.0),
+                          padding: const EdgeInsets.only(top: 7.0),
                           child: GestureDetector(
                             onTap: () => _selectDate(context),
                             child: AbsorbPointer(
@@ -246,9 +287,7 @@ class _UserInformationState extends State<UserInformation> {
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          height: 15,
-                        ),
+                        SizedBox(height: responsive.verticalPadding(0.01)),
 
                         // address input
                         Padding(
@@ -323,7 +362,7 @@ class _UserInformationState extends State<UserInformation> {
                             },
                           ),
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: responsive.verticalPadding(0.01)),
                         // user type or role input
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
@@ -355,7 +394,10 @@ class _UserInformationState extends State<UserInformation> {
                                   }).toList(),
                                   hint: const Padding(
                                     padding: EdgeInsets.only(top: 8.0),
-                                    child: Text('Select your role'),
+                                    child: Text(
+                                      'Select your Role: Employer or Job Hunter',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
                                   ),
                                   style: CustomTextStyle.regularText,
                                   isExpanded: true,
@@ -367,15 +409,13 @@ class _UserInformationState extends State<UserInformation> {
                             ],
                           ),
                         ),
-                        const SizedBox(
-                          height: 40,
-                        ),
+                        SizedBox(height: responsive.verticalPadding(0.09)),
                         // button for submition
                         SizedBox(
                           height: 50,
                           width: MediaQuery.of(context).size.width * 0.90,
                           child: CustomButton(
-                            buttonText: "Continue",
+                            buttonText: "Proceed",
                             onPressed: () {
                               storeData();
                             },
@@ -399,8 +439,12 @@ class _UserInformationState extends State<UserInformation> {
       showSnackBar(context, "Please upload your profile photo");
       return;
     }
-    if (_nameController.text.isEmpty) {
-      showSnackBar(context, "Please enter your full name");
+    if (_firstNameController.text.isEmpty) {
+      showSnackBar(context, "Please enter your first name");
+      return;
+    }
+    if (_lastNameController.text.isEmpty) {
+      showSnackBar(context, "Please enter your last name");
       return;
     }
     if (_phoneController.text.isEmpty) {
@@ -424,8 +468,14 @@ class _UserInformationState extends State<UserInformation> {
       return;
     }
 
+    String middleName = _middleNameController.text.trim();
+    String suffix = _suffixController.text.trim();
+
     UserModel userModel = UserModel(
-      name: _nameController.text.trim(),
+      firstName: _firstNameController.text.trim(),
+      middleName: middleName.isEmpty ? '' : middleName,
+      lastName: _lastNameController.text.trim(),
+      suffix: suffix.isEmpty ? '' : suffix,
       email: '',
       role: _roleSelection?.trim() ?? "",
       sex: _sex ?? "",
@@ -437,22 +487,22 @@ class _UserInformationState extends State<UserInformation> {
       uid: ap.uid,
     );
 
-ap.saveUserDataToFirebase(
-    context: context,
-    userModel: userModel,
-    profilePic: image!,
-    onSuccess: () {
-      ap.saveUserDataToSP().then((value) {
-        ap.setSignIn();
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const DoneCreatePage(),
-          ),
-          (route) => false,
-        );
-      });
-    },
-  );
+    ap.saveUserDataToFirebase(
+      context: context,
+      userModel: userModel,
+      profilePic: image!,
+      onSuccess: () {
+        ap.saveUserDataToSP().then((value) {
+          ap.setSignIn();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DoneCreatePage(),
+            ),
+            (route) => false,
+          );
+        });
+      },
+    );
   }
 }

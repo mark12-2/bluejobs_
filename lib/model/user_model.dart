@@ -1,5 +1,8 @@
 class UserModel {
-  String name;
+  String firstName;
+  String middleName;
+  String lastName;
+  String suffix;
   String email;
   String role;
   String sex;
@@ -11,7 +14,10 @@ class UserModel {
   String uid;
 
   UserModel({
-    required this.name,
+    required this.firstName,
+    required this.middleName,
+    required this.lastName,
+    required this.suffix,
     required this.email,
     required this.role,
     required this.sex,
@@ -26,7 +32,10 @@ class UserModel {
   // from map
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      name: map['name'] ?? '',
+      firstName: map['firstName'] ?? '',
+      middleName: map['middleName'] ?? '',
+      lastName: map['lastName'] ?? '',
+      suffix: map['suffix'] ?? '',
       email: map['email'],
       role: map['role'] ?? '',
       sex: map['sex'] ?? '',
@@ -44,7 +53,10 @@ class UserModel {
   // to map
   Map<String, dynamic> toMap() {
     return {
-      "name": name,
+      "firstName": firstName,
+      "middleName": middleName,
+      "lastName": lastName,
+      "suffix": suffix,
       "email": email,
       "role": role,
       "sex": sex,

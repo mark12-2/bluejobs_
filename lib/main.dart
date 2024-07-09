@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
         title: 'Blue Jobs',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
         home: const SignInPage(),

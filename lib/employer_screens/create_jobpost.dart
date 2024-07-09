@@ -6,6 +6,7 @@ import 'package:bluejobs/styles/custom_theme.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,10 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
   final _locationController = TextEditingController();
   final _typeController = TextEditingController();
   final _rateController = TextEditingController();
+  final _numberOfWorkersController = TextEditingController();
+  final _startDateController = TextEditingController();
+  final _endDateController = TextEditingController();
+  final _workingHoursController = TextEditingController();
 
   List<LatLng> routePoints = [];
 
@@ -33,12 +38,21 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
   final _typeFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
   final _rateFocusNode = FocusNode();
+  final _numberOfWorkersFocusNode = FocusNode();
+  final _startDateFocusNode = FocusNode();
+  final _endDateFocusNode = FocusNode();
+  DateTime? _selectedDate;
+  final _workingHoursFocusNode = FocusNode();
 
   bool _isTitleFocused = false;
   bool _isDescriptionFocused = false;
   bool _isLocationFocused = false;
   bool _isRateFocused = false;
   bool _isTypeFocused = false;
+  bool _isNumberOfWorkersFocused = false;
+  bool _isStartDateFormatFocused = false;
+  bool _isEndDateFormatFocused = false;
+  bool _isWorkingHoursFocused = false;
 
   @override
   void dispose() {
@@ -46,11 +60,19 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
     _descriptionController.dispose();
     _locationController.dispose();
     _rateController.dispose();
+    _numberOfWorkersController.dispose();
+    _startDateController.dispose();
+    _endDateController.dispose();
+    _workingHoursController.dispose();
     _titleFocusNode.dispose();
     _descriptionFocusNode.dispose();
     _typeFocusNode.dispose();
     _locationFocusNode.dispose();
     _rateFocusNode.dispose();
+    _numberOfWorkersFocusNode.dispose();
+    _startDateFocusNode.dispose();
+    _endDateFocusNode.dispose();
+    _workingHoursFocusNode.dispose();
     super.dispose();
   }
 
@@ -62,6 +84,10 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
     _typeFocusNode.addListener(_onFocusChange);
     _locationFocusNode.addListener(_onFocusChange);
     _rateFocusNode.addListener(_onFocusChange);
+    _numberOfWorkersFocusNode.addListener(_onFocusChange);
+    _startDateFocusNode.addListener(_onFocusChange);
+    _endDateFocusNode.addListener(_onFocusChange);
+    _workingHoursFocusNode.addListener(_onFocusChange);
   }
 
   void _onFocusChange() {
@@ -69,9 +95,44 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
       _isTitleFocused = _titleFocusNode.hasFocus;
       _isDescriptionFocused = _descriptionFocusNode.hasFocus;
       _isLocationFocused = _locationFocusNode.hasFocus;
-      _isTypeFocused = _typeFocusNode.hasFocus;
       _isRateFocused = _rateFocusNode.hasFocus;
+      _isTypeFocused = _typeFocusNode.hasFocus;
+      _isNumberOfWorkersFocused = _numberOfWorkersFocusNode.hasFocus;
+      _isStartDateFormatFocused = _startDateFocusNode.hasFocus;
+      _isEndDateFormatFocused = _endDateFocusNode.hasFocus;
+      _isWorkingHoursFocused = _workingHoursFocusNode.hasFocus;
     });
+  }
+
+  // toggle calendar for start and end dates
+  void _selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _startDateController.text = DateFormat('MM-dd-yyyy').format(picked);
+      });
+    }
+  }
+
+  void _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _endDateController.text = DateFormat('MM-dd-yyyy').format(picked);
+      });
+    }
   }
 
   @override
@@ -162,7 +223,6 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                 ),
               ),
 
-
             const SizedBox(height: 20),
 
             // add leaflet for job location (mapping feature)
@@ -181,17 +241,127 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                   const Padding(
                     padding: EdgeInsets.only(top: 8.0),
                     child: Text(
-                      'Enter address Ex. Illawod Poblacion, Legazpi City',
+                      'Enter address Ex. Illawod Poblacion, Legazpi City, Albay',
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ),
-                ElevatedButton(
-                  onPressed: () =>
-                      showLocationPickerModal(context, _locationController),
-                  child: const Text('Show Location'),
+                const SizedBox(height: 10),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        showLocationPickerModal(context, _locationController),
+                    child: const Text('Show Location',
+                        style: CustomTextStyle.regularText),
+                  ),
                 ),
               ],
             ),
+
+            const SizedBox(height: 20),
+
+            TextField(
+              controller: _numberOfWorkersController,
+              focusNode: _numberOfWorkersFocusNode,
+              decoration: customInputDecoration('Number of Workers'),
+              maxLines: 5,
+              minLines: 1,
+              keyboardType: TextInputType.multiline,
+            ),
+            if (_isNumberOfWorkersFocused)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'Enter the number of workers required for the job.',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ),
+
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 7.0),
+                    child: GestureDetector(
+                      onTap: () => _selectStartDate(context),
+                      child: AbsorbPointer(
+                        child: TextField(
+                          controller: _startDateController,
+                          focusNode: _startDateFocusNode,
+                          decoration: const InputDecoration(
+                              labelText: 'Start Date',
+                              labelStyle: CustomTextStyle.regularText,
+                              suffixIcon: Icon(Icons.calendar_today),
+                              hintText: 'Date when the job will start',
+                              hintStyle: CustomTextStyle.regularText,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1,
+                                ),
+                              )),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 7.0),
+                    child: GestureDetector(
+                      onTap: () => _selectEndDate(context),
+                      child: AbsorbPointer(
+                        child: TextField(
+                          controller: _endDateController,
+                          focusNode: _endDateFocusNode,
+                          decoration: const InputDecoration(
+                              labelText: 'End Date',
+                              labelStyle: CustomTextStyle.regularText,
+                              suffixIcon: Icon(Icons.calendar_today),
+                              hintText: 'Date when the job will end',
+                              hintStyle: CustomTextStyle.regularText,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1,
+                                ),
+                              )),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (_isStartDateFormatFocused || _isEndDateFormatFocused)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'Enter the start and end dates of the job.',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ),
+
+            const SizedBox(height: 20),
+
+            TextField(
+              controller: _workingHoursController,
+              focusNode: _workingHoursFocusNode,
+              decoration: customInputDecoration('Working Hours'),
+              maxLines: 10,
+              minLines: 1,
+              keyboardType: TextInputType.multiline,
+            ),
+            if (_isWorkingHoursFocused)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'Enter the working hours of the job. Example: 8am - 5pm',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ),
 
             const SizedBox(height: 20),
 
@@ -228,12 +398,21 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
         _descriptionController.text.isNotEmpty &&
         _typeController.text.isNotEmpty &&
         _locationController.text.isNotEmpty &&
-        _rateController.text.isNotEmpty) {
+        _rateController.text.isNotEmpty &&
+        _numberOfWorkersController.text.isNotEmpty &&
+        _startDateController.text.isNotEmpty &&
+        _endDateController.text.isNotEmpty &&
+        _workingHoursController.text.isNotEmpty) {
       String title = _titleController.text;
       String description = _descriptionController.text;
       String type = _typeController.text;
       String location = _locationController.text;
       String rate = _rateController.text;
+      String numberOfWorkers = _numberOfWorkersController.text;
+      String startDate = _startDateController.text;
+      String endDate = _endDateController.text;
+      String workingHours = _workingHoursController.text;
+
       // add the details
       var jobPostDetails = Post(
         title: title,
@@ -241,6 +420,10 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
         type: type,
         location: location,
         rate: rate,
+        numberOfWorkers: numberOfWorkers,
+        startDate: startDate,
+        endDate: endDate,
+        workingHours: workingHours,
       );
 
       try {

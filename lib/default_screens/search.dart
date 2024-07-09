@@ -40,7 +40,10 @@ class _SearchPageState extends State<SearchPage> {
     List<Map<String, dynamic>> allUsers = usersSnapshot.docs.map((doc) {
       return {
         'id': doc.id,
-        'name': doc.get('name'),
+        'firstName': doc.get('firstName'),
+        'middleName': doc.get('middleName'),
+        'lastName': doc.get('lastName'),
+        'suffix': doc.get('suffix'),
         'profilePic': doc.get('profilePic'),
         'role': doc.get('role'),
       };
@@ -71,7 +74,9 @@ class _SearchPageState extends State<SearchPage> {
   void _filterUsers(String query) {
     query = query.toLowerCase();
     List<Map<String, dynamic>> filteredUsers = _allUsers.where((user) {
-      return user['name'].toLowerCase().contains(query);
+      String fullName =
+          '${user['firstName']} ${user['middleName']} ${user['lastName']}';
+      return fullName.toLowerCase().contains(query);
     }).toList();
     setState(() {
       _filteredUsers = filteredUsers;
@@ -130,28 +135,42 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: _filteredUsers.length,
-                    itemBuilder: (context, index) {
-                      var user = _filteredUsers[index];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(user['profilePic']),
-                        ),
-                        title: Text(user['name']),
-                        subtitle: Text(user['role']),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ProfilePage(userId: user['id']),
+                  child: _filteredPosts.isEmpty && _filteredUsers.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No posts or users available',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey,
                             ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _filteredPosts.length,
+                          itemBuilder: (context, index) {
+                            var post = _filteredPosts[index];
+                            var user = _filteredUsers[index];
+                            String fullName =
+                                '${user['firstName']} ${user['middleName']} ${user['lastName']} ${user['suffix']}';
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(user['profilePic']),
+                              ),
+                              title: Text(fullName),
+                              subtitle: Text(post['description']),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ViewPostPage(post: post),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -181,11 +200,13 @@ class _SearchPageState extends State<SearchPage> {
                     itemBuilder: (context, index) {
                       var post = _filteredPosts[index];
                       var user = _filteredUsers[index];
+                      String fullName =
+                          '${user['firstName']} ${user['middleName']} ${user['lastName']} ${user['suffix']}';
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundImage: NetworkImage(user['profilePic']),
                         ),
-                        title: Text(user['name']),
+                        title: Text(fullName),
                         // title: Text(post['title']),
                         subtitle: Text(post['description']),
                         onTap: () {

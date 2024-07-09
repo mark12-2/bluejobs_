@@ -14,7 +14,7 @@ void showLocationPickerModal(
       context: context,
       builder: (context) {
         return Container(
-          height: 400,
+          height: 500,
           child: FlutterMap(
             options: MapOptions(
               initialCenter: LatLng(lat, lon),
@@ -38,6 +38,7 @@ void showLocationPickerModal(
                     child: const Icon(
                       Icons.location_pin,
                       color: Color.fromARGB(255, 226, 17, 2),
+                      size: 50.0,
                     ),
                   ),
                 ],

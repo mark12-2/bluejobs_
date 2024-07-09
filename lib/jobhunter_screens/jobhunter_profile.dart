@@ -151,7 +151,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            userLoggedIn.userModel.name,
+            "${userLoggedIn.userModel.firstName} ${userLoggedIn.userModel.middleName} ${userLoggedIn.userModel.lastName} ${userLoggedIn.userModel.suffix}",
             style: CustomTextStyle.semiBoldText,
           ),
           Text(
@@ -414,7 +414,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildResumeItem('Name', userLoggedIn.userModel.name),
+                  buildResumeItem('Name', "${userLoggedIn.userModel.firstName} ${userLoggedIn.userModel.middleName} ${userLoggedIn.userModel.lastName} ${userLoggedIn.userModel.suffix}",),
                   buildResumeItem('Sex', userLoggedIn.userModel.sex),
                   buildResumeItem('Birthday', userLoggedIn.userModel.birthdate),
                   buildResumeItem(

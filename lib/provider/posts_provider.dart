@@ -36,6 +36,7 @@ class PostsProvider with ChangeNotifier {
   }
 
   // method to add a job post
+  // method to add a job post
   Future<DocumentReference> addPost(Post post) async {
     final currentUser = await FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
@@ -52,7 +53,8 @@ class PostsProvider with ChangeNotifier {
 
       return posts.add({
         "ownerId": currentUserDetails.uid,
-        "name": currentUserDetails.name,
+        "name":
+            "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}",
         "email": currentUserDetails.email,
         "role": currentUserDetails.role,
         "profilePic": currentUserDetails.profilePic,
@@ -61,8 +63,14 @@ class PostsProvider with ChangeNotifier {
         "type": post.type,
         "location": post.location ?? '',
         "rate": post.rate ?? '',
+        "numberOfWorkers": post.numberOfWorkers ?? '',
+        "startDate": post.startDate ?? '',
+        "endDate": post.endDate ?? '',
+        "workingHours": post.workingHours ?? '',
         "timestamp": Timestamp.now(),
-        "likes": []
+        "likes": [],
+        "isPostExpired": false,
+        "isApplicationFull": false,
       });
     } else {
       throw Exception('User document not found.');
@@ -115,10 +123,15 @@ class PostsProvider with ChangeNotifier {
       "type": post.type,
       "location": post.location ?? '',
       "rate": post.rate ?? '',
-      "name": currentUserDetails.name,
+      "name":
+          "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}",
       "email": currentUserDetails.email,
       "role": currentUserDetails.role,
       "profilePic": currentUserDetails.profilePic,
+      "numberOfWorkers": post.numberOfWorkers ?? '',
+      "startDate": post.startDate ?? '',
+      "endDate": post.endDate ?? '',
+      "workingHours": post.workingHours ?? '',
       "timestamp": Timestamp.now(),
     });
   }
@@ -134,7 +147,8 @@ class PostsProvider with ChangeNotifier {
     Map<String, dynamic> commentData = {
       'commentText': commentText,
       'postId': postId,
-      'username': currentUserDetails.name,
+      'username':
+          "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}",
       'userId': currentUserDetails.uid,
       'createdAt': Timestamp.now(),
     };
@@ -147,29 +161,48 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> addApplicant(
-      String postId, String applicantId, String applicantName) async {
-    UserModel? currentUserDetails = await fetchCurrentUserDetails();
-    if (currentUserDetails == null) {
-      throw Exception('Current user details could not be fetched.');
+  String postId, 
+  String applicantId, 
+  String applicantName, 
+) async {
+  final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+  final postDoc = await postRef.get();
+
+  if (postDoc.exists) {
+    final data = postDoc.data() as Map<String, dynamic>;
+    final numberOfWorkers = data['numberOfWorkers']?? 0;
+    final currentApplicants = data['applicants']?? [];
+
+    if (currentApplicants.length < numberOfWorkers) {
+      UserModel? currentUserDetails = await fetchCurrentUserDetails();
+      if (currentUserDetails == null) {
+        throw Exception('Current user details could not be fetched.');
+      }
+
+      await FirebaseFirestore.instance
+          .collection('Posts')
+          .doc(postId)
+          .collection('Applicants')
+          .doc(applicantId)
+          .set({
+        'applicantName':
+            "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}",
+        'applicantPhone': currentUserDetails.phoneNumber,
+        'idOfApplicant': applicantId,
+        'isHired': false,
+        'timestamp': Timestamp.now()
+      });
+
+      await postRef.update({
+        'applicants': FieldValue.arrayUnion([applicantId]),
+      });
+    } else {
+      // Show an error message or notification
+      print('Cannot add more applicants. The job is full.');
     }
-
-    await FirebaseFirestore.instance
-        .collection('Posts')
-        .doc(postId)
-        .collection('Applicants')
-        .doc(applicantId)
-        .set({
-      'applicantName': currentUserDetails.name,
-      'applicantPhone': currentUserDetails.phoneNumber,
-      'idOfApplicant': applicantId,
-      'isHired': false,
-      'timestamp': Timestamp.now()
-    });
-
-    await FirebaseFirestore.instance.collection('Posts').doc(postId).update({
-      'applicants': FieldValue.arrayUnion([applicantId]),
-    });
   }
+}
+  
 
   Future<void> applyJob(String jobId, String jobTitle, String jobDescription,
       String employerId, String employerName) async {

@@ -36,6 +36,7 @@ class _SignInPageState extends State<SignInPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 7, 30, 47),
       ),
       backgroundColor: const Color.fromARGB(255, 19, 52, 77),
@@ -112,12 +113,11 @@ class _SignInPageState extends State<SignInPage> {
                     "Forgot Password?",
                     style: CustomTextStyle.regularText.copyWith(
                       color: Colors.white,
-                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: responsive.verticalPadding(0.02)),
+              SizedBox(height: responsive.verticalPadding(0.04)),
               CustomButton(
                 onPressed: () async {
                   setState(() {

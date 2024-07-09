@@ -93,25 +93,6 @@ class _PostPageState extends State<PostPage> {
 
             const SizedBox(height: 20),
 
-            // TextField(
-            //   controller: _rateController,
-            //   focusNode: _rateFocusNode,
-            //   decoration: customInputDecoration('Rate'),
-            //   maxLines: 20,
-            //   minLines: 1,
-            //   keyboardType: TextInputType.multiline,
-            // ),
-            // if (_isRateFocused)
-            //   const Padding(
-            //     padding: EdgeInsets.only(top: 8.0),
-            //     child: Text(
-            //       'Enter the rate. Ex. 300 per hour/day',
-            //       style: TextStyle(color: Colors.grey, fontSize: 12),
-            //     ),
-            //   ),
-
-            const SizedBox(height: 20),
-
             TextField(
               controller: _typeController,
               focusNode: _typeFocusNode,

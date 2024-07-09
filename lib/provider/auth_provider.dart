@@ -156,8 +156,11 @@ class AuthProvider with ChangeNotifier {
 
   // update user information
   Future<void> updateUserData({
-    required BuildContext context,
-    String? name,
+  required BuildContext context,
+    String? firstName,
+    String? middleName,
+    String? lastName,
+    String? suffix,
     String? address,
     File? profilePic,
     required String uid,
@@ -170,8 +173,17 @@ class AuthProvider with ChangeNotifier {
         userModel.profilePic =
             await storeFileToStorage("profilePic/$uid", profilePic);
       }
-      if (name != null && name.isNotEmpty) {
-        userModel.name = name;
+      if (firstName != null && firstName.isNotEmpty) {
+        userModel.firstName = firstName;
+      }
+      if (middleName != null && middleName.isNotEmpty) {
+        userModel.middleName = middleName;
+      }
+      if (lastName != null && lastName.isNotEmpty) {
+        userModel.lastName = lastName;
+      }
+      if (suffix != null && suffix.isNotEmpty) {
+        userModel.suffix = suffix;
       }
       if (address != null && address.isNotEmpty) {
         userModel.address = address;
@@ -193,40 +205,53 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-  }
+}
 
   // storing the image in firebase storage
   Future<String> storeFileToStorage(String ref, File file) async {
-    if (!file.existsSync()) {
-      throw Exception("File does not exist");
-    }
-    UploadTask uploadTask = _firebaseStorage.ref().child(ref).putFile(file);
-    TaskSnapshot snapshot = await uploadTask;
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-    return downloadUrl;
+  if (!file.existsSync()) {
+    throw Exception("File does not exist");
   }
+  UploadTask uploadTask = _firebaseStorage.ref().child(ref).putFile(file);
+  TaskSnapshot snapshot = await uploadTask;
+  String downloadUrl = await snapshot.ref.getDownloadURL();
+  return downloadUrl;
+}
 
-  Future getDataFromFirestore() async {
+  Future<void> getDataFromFirestore() async {
+  try {
     await _firebaseFirestore
         .collection("users")
         .doc(_firebaseAuth.currentUser!.uid)
         .get()
         .then((DocumentSnapshot snapshot) {
-      _userModel = UserModel(
-        name: snapshot['name'],
-        email: snapshot['email'],
-        role: snapshot['role'],
-        sex: snapshot['sex'],
-        address: snapshot['address'],
-        birthdate: snapshot['birthdate'],
-        createdAt: snapshot['createdAt'],
-        uid: snapshot['uid'],
-        profilePic: snapshot['profilePic'],
-        phoneNumber: snapshot['phoneNumber'],
-      );
-      _uid = userModel.uid;
+      if (snapshot.exists) {
+        _userModel = UserModel(
+          firstName: snapshot['firstName'],
+          middleName: snapshot['middleName'],
+          lastName: snapshot['lastName'],
+          suffix: snapshot['suffix'],
+          email: snapshot['email'],
+          role: snapshot['role'],
+          sex: snapshot['sex'],
+          address: snapshot['address'],
+          birthdate: snapshot['birthdate'],
+          createdAt: snapshot['createdAt'],
+          uid: snapshot['uid'],
+          profilePic: snapshot['profilePic'],
+          phoneNumber: snapshot['phoneNumber'],
+        );
+        _uid = userModel.uid;
+      } else {
+        // Handle the case where the user data is null
+        print("User data not found");
+      }
     });
+  } catch (e) {
+    // Handle any exceptions that might occur
+    print("Error getting data from Firestore: $e");
   }
+}
 
   Future saveUserDataToSP() async {
     SharedPreferences s = await SharedPreferences.getInstance();
