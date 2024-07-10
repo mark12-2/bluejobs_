@@ -201,7 +201,7 @@ class _HomePageState extends State<HomePage> {
                                                   auth.currentUser?.uid !=
                                                           userId
                                                       ? IconButton(
-                                                          icon: Icon(
+                                                          icon: const Icon(
                                                               Icons.message),
                                                           onPressed: () {
                                                             Navigator.push(
@@ -468,7 +468,6 @@ class _HomePageState extends State<HomePage> {
                                                         bool isApplied =
                                                             snapshot.data ??
                                                                 false;
-                                                        // bool isJobFull = post.applicants.length >= post.numberOfWorkers;
                                                         return GestureDetector(
                                                           onTap:
                                                               isApplied ||
@@ -560,9 +559,12 @@ class _HomePageState extends State<HomePage> {
                                                             ),
                                                             child: Center(
                                                               child: Text(
-                                                                isApplied
-                                                                    ? 'Applied'
-                                                                    : 'Apply Job',
+                                                                postDetails
+                                                                        .isJobPostAvailable
+                                                                    ? (isApplied
+                                                                        ? 'Applied'
+                                                                        : 'Apply Job')
+                                                                    : 'Unavailable',
                                                                 style: CustomTextStyle
                                                                     .regularText
                                                                     .copyWith(

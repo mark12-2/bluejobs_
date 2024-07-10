@@ -13,7 +13,8 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _userSearchController = TextEditingController();
+  final TextEditingController _postSearchController = TextEditingController();
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> _filteredUsers = [];
   List<Map<String, dynamic>> _allPosts = [];
@@ -30,7 +31,8 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _userSearchController.dispose();
+    _postSearchController.dispose();
     super.dispose();
   }
 
@@ -40,12 +42,13 @@ class _SearchPageState extends State<SearchPage> {
     List<Map<String, dynamic>> allUsers = usersSnapshot.docs.map((doc) {
       return {
         'id': doc.id,
-        'firstName': doc.get('firstName'),
-        'middleName': doc.get('middleName'),
-        'lastName': doc.get('lastName'),
-        'suffix': doc.get('suffix'),
-        'profilePic': doc.get('profilePic'),
-        'role': doc.get('role'),
+        'firstName': doc.get('firstName') ?? '',
+        'middleName': doc.get('middleName') ?? '',
+        'lastName': doc.get('lastName') ?? '',
+        'suffix': doc.get('suffix') ?? '',
+        'profilePic': doc.get('profilePic') ?? '',
+        'role': doc.get('role') ?? '',
+        'uid': doc.get('uid') ?? '',
       };
     }).toList();
     setState(() {
@@ -60,9 +63,13 @@ class _SearchPageState extends State<SearchPage> {
     List<Map<String, dynamic>> allPosts = postsSnapshot.docs.map((doc) {
       return {
         'id': doc.id,
-        'title': doc.get('title'),
-        'description': doc.get('description'),
-        'ownerId': doc.get('ownerId'),
+        'title': doc.get('title') ?? '',
+        'description': doc.get('description') ?? '',
+        'type': doc.get('type') ?? '',
+        'ownerId': doc.get('ownerId') ?? '',
+        'location': doc.get('location') ?? '',
+        'name': doc.get('name') ?? '',
+        'profilePic': doc.get('profilePic') ?? '',
       };
     }).toList();
     setState(() {
@@ -76,7 +83,8 @@ class _SearchPageState extends State<SearchPage> {
     List<Map<String, dynamic>> filteredUsers = _allUsers.where((user) {
       String fullName =
           '${user['firstName']} ${user['middleName']} ${user['lastName']}';
-      return fullName.toLowerCase().contains(query);
+      return fullName.toLowerCase().contains(query) ||
+          user['role'].toLowerCase().contains(query);
     }).toList();
     setState(() {
       _filteredUsers = filteredUsers;
@@ -86,7 +94,10 @@ class _SearchPageState extends State<SearchPage> {
   void _filterPosts(String query) {
     query = query.toLowerCase();
     List<Map<String, dynamic>> filteredPosts = _allPosts.where((post) {
-      return post['title'].toLowerCase().contains(query);
+      return post['title'].toLowerCase().contains(query) ||
+          post['location'].toLowerCase().contains(query) ||
+          post['description'].toLowerCase().contains(query) ||
+          post['type'].toLowerCase().contains(query);
     }).toList();
     setState(() {
       _filteredPosts = filteredPosts;
@@ -101,7 +112,7 @@ class _SearchPageState extends State<SearchPage> {
         appBar: AppBar(
           title: const Text('Search'),
           bottom: TabBar(
-            tabs: [
+            tabs: const [
               Tab(text: 'Users'),
               Tab(text: 'Posts'),
             ],
@@ -119,13 +130,13 @@ class _SearchPageState extends State<SearchPage> {
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: TextField(
-                    controller: _searchController,
+                    controller: _userSearchController,
                     decoration:
                         customInputDecoration('Search users...').copyWith(
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.search),
                         onPressed: () {
-                          _filterUsers(_searchController.text);
+                          _filterUsers(_userSearchController.text);
                         },
                       ),
                     ),
@@ -135,10 +146,10 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 Expanded(
-                  child: _filteredPosts.isEmpty && _filteredUsers.isEmpty
+                  child: _filteredUsers.isEmpty
                       ? const Center(
                           child: Text(
-                            'No posts or users available',
+                            'No users available',
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.grey,
@@ -146,9 +157,8 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         )
                       : ListView.builder(
-                          itemCount: _filteredPosts.length,
+                          itemCount: _filteredUsers.length,
                           itemBuilder: (context, index) {
-                            var post = _filteredPosts[index];
                             var user = _filteredUsers[index];
                             String fullName =
                                 '${user['firstName']} ${user['middleName']} ${user['lastName']} ${user['suffix']}';
@@ -158,13 +168,13 @@ class _SearchPageState extends State<SearchPage> {
                                     NetworkImage(user['profilePic']),
                               ),
                               title: Text(fullName),
-                              subtitle: Text(post['description']),
+                              subtitle: Text(user['role']),
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        ViewPostPage(post: post),
+                                        ProfilePage(userId: user['uid']),
                                   ),
                                 );
                               },
@@ -179,13 +189,13 @@ class _SearchPageState extends State<SearchPage> {
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: TextField(
-                    controller: _searchController,
+                    controller: _postSearchController,
                     decoration:
                         customInputDecoration('Search posts...').copyWith(
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.search),
                         onPressed: () {
-                          _filterPosts(_searchController.text);
+                          _filterPosts(_postSearchController.text);
                         },
                       ),
                     ),
@@ -195,32 +205,45 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: _filteredPosts.length,
-                    itemBuilder: (context, index) {
-                      var post = _filteredPosts[index];
-                      var user = _filteredUsers[index];
-                      String fullName =
-                          '${user['firstName']} ${user['middleName']} ${user['lastName']} ${user['suffix']}';
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(user['profilePic']),
-                        ),
-                        title: Text(fullName),
-                        // title: Text(post['title']),
-                        subtitle: Text(post['description']),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ViewPostPage(post: post),
+                  child: _filteredPosts.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No posts available',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey,
                             ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _filteredPosts.length,
+                          itemBuilder: (context, index) {
+                            var post = _filteredPosts[index];
+
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(post['profilePic']),
+                              ),
+                              title: Text(post['title'].isEmpty
+                                  ? post['type']
+                                  : post['title']),
+                              subtitle: Text(post['location'].isEmpty
+                                  ? post['description']
+                                  : post['location']),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ViewPostPage(postId: post['id']),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                )
               ],
             ),
           ],

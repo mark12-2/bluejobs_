@@ -11,6 +11,9 @@ class PostsProvider with ChangeNotifier {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  bool _isJobPostAvailable = true;
+  bool get isJobPostAvailable => _isJobPostAvailable;
+
   Future<UserModel?> fetchCurrentUserDetails() async {
     try {
       final currentUser = auth.currentUser;
@@ -35,7 +38,6 @@ class PostsProvider with ChangeNotifier {
     }
   }
 
-  // method to add a job post
   // method to add a job post
   Future<DocumentReference> addPost(Post post) async {
     final currentUser = await FirebaseAuth.instance.currentUser;
@@ -69,12 +71,26 @@ class PostsProvider with ChangeNotifier {
         "workingHours": post.workingHours ?? '',
         "timestamp": Timestamp.now(),
         "likes": [],
-        "isPostExpired": false,
         "isApplicationFull": false,
       });
     } else {
       throw Exception('User document not found.');
     }
+  }
+
+  Future<void> setJobPostAsUnavailable(String postId) async {
+    await FirebaseFirestore.instance.collection('Posts').doc(postId).update({
+      'isApplicationFull': true,
+    });
+    _isJobPostAvailable = false;
+    notifyListeners();
+  }
+
+  Future<void> setJobPostAsAvailable(String postId) async {
+    // Update the job post status in your database or API
+    await FirebaseFirestore.instance.collection('jobPosts').doc(postId).update({
+      'isApplicationFull': false,
+    });
   }
 
   // deleting a post
@@ -161,19 +177,14 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> addApplicant(
-  String postId, 
-  String applicantId, 
-  String applicantName, 
-) async {
-  final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
-  final postDoc = await postRef.get();
+    String postId,
+    String applicantId,
+    String applicantName,
+  ) async {
+    final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+    final postDoc = await postRef.get();
 
-  if (postDoc.exists) {
-    final data = postDoc.data() as Map<String, dynamic>;
-    final numberOfWorkers = data['numberOfWorkers']?? 0;
-    final currentApplicants = data['applicants']?? [];
-
-    if (currentApplicants.length < numberOfWorkers) {
+    if (postDoc.exists) {
       UserModel? currentUserDetails = await fetchCurrentUserDetails();
       if (currentUserDetails == null) {
         throw Exception('Current user details could not be fetched.');
@@ -201,8 +212,6 @@ class PostsProvider with ChangeNotifier {
       print('Cannot add more applicants. The job is full.');
     }
   }
-}
-  
 
   Future<void> applyJob(String jobId, String jobTitle, String jobDescription,
       String employerId, String employerName) async {

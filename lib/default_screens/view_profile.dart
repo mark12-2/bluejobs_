@@ -1,3 +1,4 @@
+import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/employer_screens/edit_jobpost.dart';
 import 'package:bluejobs/jobhunter_screens/edit_post.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
@@ -5,6 +6,7 @@ import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
@@ -43,11 +45,38 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    String firstName = userData?['firstName'] ?? '';
+    String middleName = userData?['middleName'] ?? '';
+    String lastName = userData?['lastName'] ?? '';
+    String suffix = userData?['suffix'] ?? '';
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(userData?['name'] ?? 'Profile'),
+          title: const Text('Profile'),
+          actions: [
+            auth.currentUser?.uid != userData?['uid']
+                ? Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: IconButton(
+                      icon: const Icon(Icons.message),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MessagingBubblePage(
+                              receiverName:
+                                  '$firstName $middleName $lastName $suffix',
+                              receiverId: userData?['uid'],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : Container(),
+          ],
         ),
         body: userData == null
             ? const Center(child: CircularProgressIndicator())
@@ -56,10 +85,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Row(
+                      child: Column(
                         children: [
                           buildProfilePicture(),
-                          const SizedBox(width: 20),
+                          const SizedBox(height: 20),
                           buildProfile(),
                         ],
                       ),
@@ -91,12 +120,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget buildProfile() {
+    String firstName = userData?['firstName'] ?? '';
+    String middleName = userData?['middleName'] ?? '';
+    String lastName = userData?['lastName'] ?? '';
+    String suffix = userData?['suffix'] ?? '';
+
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            userData?['name'] ?? '',
+            '$firstName $middleName $lastName $suffix',
             style: CustomTextStyle.semiBoldText,
           ),
           Text(
@@ -113,12 +147,12 @@ class _ProfilePageState extends State<ProfilePage> {
         child: TabBar(
           isScrollable: true,
           tabs: [
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width / 3,
-              child: const Tab(text: 'My Posts'),
+              child: const Tab(text: 'Posts'),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width / 3,
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 4,
               child: const Tab(text: 'About'),
             ),
           ],
@@ -138,9 +172,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildPostsTab() {
     final PostsProvider postsProvider = PostsProvider();
     return StreamBuilder<QuerySnapshot>(
-        stream: widget.userId != null
-            ? postsProvider.getSpecificPostsStream(widget.userId)
-            : const Stream.empty(),
+        stream: postsProvider.getSpecificPostsStream(widget.userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -212,15 +244,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   responsiveSize(context, 0.05),
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 55.0),
-                                            child: Text(
-                                              role,
-                                              style: CustomTextStyle
-                                                  .roleRegularText,
-                                            ),
-                                          ),
+                                          // Padding(
+                                          //   padding: const EdgeInsets.only(
+                                          //       right: 55.0),
+                                          //   child: Text(
+                                          //     role,
+                                          //     style: CustomTextStyle
+                                          //         .roleRegularText,
+                                          //   ),
+                                          // ),
                                         ],
                                       ),
                                     ],
@@ -347,7 +379,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildResumeItem('Name', userData?['name'] ?? ''),
+            buildResumeItem('Name', userData?['firstName'] ?? ''),
             buildResumeItem('Contact Number', userData?['phoneNumber'] ?? ''),
             buildResumeItem('Sex', userData?['sex'] ?? ''),
             buildResumeItem('Address', userData?['address'] ?? ''),

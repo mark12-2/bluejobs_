@@ -57,13 +57,13 @@ class _SignInPageState extends State<SignInPage> {
               ),
               SizedBox(height: responsive.verticalPadding(0.02)),
               Text(
-                'Sign in Your Account',
+                'Log in to Your Account',
                 style: CustomTextStyle.semiBoldText.copyWith(
                   color: Colors.white,
                   fontSize: responsiveSize(context, 0.03),
                 ),
               ),
-              SizedBox(height: responsive.verticalPadding(0.01)),
+              SizedBox(height: responsive.verticalPadding(0.02)),
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(

@@ -59,37 +59,38 @@ class _JobHunterResumeViewState extends State<JobHunterResumeView> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 1,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(userData?['name'] ?? 'Profile'),
-        ),
-        body: userData == null
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        children: [
-                          buildProfilePicture(),
-                          const SizedBox(width: 20),
-                          buildProfile(),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    buildTabBar(),
-                    SizedBox(
-                      height: 500,
-                      child: buildTabBarView(),
-                    ),
-                  ],
-                ),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Resume'),
       ),
+      body: userData == null
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      children: [
+                        buildProfilePicture(),
+                        const SizedBox(width: 20),
+                        buildProfile(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    height: 1, 
+                    width: double.infinity, 
+                    color: Colors.black, 
+                  ),
+                  SizedBox(
+                    height: 500,
+                    child: buildResumeTab(),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -107,46 +108,32 @@ class _JobHunterResumeViewState extends State<JobHunterResumeView> {
   }
 
   Widget buildProfile() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            userData?['name'] ?? '',
-            style: CustomTextStyle.semiBoldText,
-          ),
-          Text(
-            userData?['role'] ?? '',
-            style: CustomTextStyle.typeRegularText,
-          ),
-        ],
-      ),
+    String firstName = userData?['firstName'] ?? '';
+    String middleName = userData?['middleName'] ?? '';
+    String lastName = userData?['lastName'] ?? '';
+    String suffix = userData?['suffix'] ?? '';
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          '$firstName $middleName $lastName $suffix',
+          style: CustomTextStyle.semiBoldText,
+        ),
+        Text(
+          userData?['role'] ?? '',
+          style: CustomTextStyle.typeRegularText,
+        ),
+      ],
     );
   }
 
-  Widget buildTabBar() => Container(
-        alignment: Alignment.center,
-        child: TabBar(
-          isScrollable: true,
-          tabs: [
-            Container(
-              width: MediaQuery.of(context).size.width / 3,
-              child: const Tab(text: 'Resume'),
-            ),
-          ],
-          labelColor: const Color.fromARGB(255, 0, 0, 0),
-          unselectedLabelColor: const Color.fromARGB(255, 124, 118, 118),
-          labelStyle: CustomTextStyle.regularText,
-        ),
-      );
-
-  Widget buildTabBarView() => TabBarView(
-        children: [
-          buildResumeTab(),
-        ],
-      );
-
   Widget buildResumeTab() {
+    String firstName = userData?['firstName'] ?? '';
+    String middleName = userData?['middleName'] ?? '';
+    String lastName = userData?['lastName'] ?? '';
+    String suffix = userData?['suffix'] ?? '';
+
     return resumeData == null
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
@@ -156,7 +143,12 @@ class _JobHunterResumeViewState extends State<JobHunterResumeView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildResumeItem('Name', userData?['name'] ?? ''),
+                  Row(
+                    children: [
+                      buildResumeItem(
+                          'Name', '$firstName $middleName $lastName $suffix'),
+                    ],
+                  ),
                   buildResumeItem('Sex', userData?['sex'] ?? ''),
                   buildResumeItem('Birthday', userData?['birthdate'] ?? ''),
                   buildResumeItem('Contacts', userData?['phoneNumber'] ?? ''),
