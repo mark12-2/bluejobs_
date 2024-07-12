@@ -87,10 +87,10 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Row(
+                child: Column(
                   children: [
                     buildProfilePicture(),
-                    const SizedBox(width: 20),
+                    const SizedBox(height: 10),
                     buildProfile(),
                   ],
                 ),
@@ -425,110 +425,111 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
     );
   }
 
- Widget buildApplicantsTab() {
-  final PostsProvider postsProvider = PostsProvider();
-  return StreamBuilder<QuerySnapshot>(
-    stream: _userId != null
-        ? postsProvider.getSpecificPostsStream(_userId)
-        : const Stream.empty(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-      if (snapshot.hasError) {
-        return Center(
-          child: Text("Error: ${snapshot.error}"),
-        );
-      }
-      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return const Center(
-          child: Text("No job posts available"),
-        );
-      }
+  Widget buildApplicantsTab() {
+    final PostsProvider postsProvider = PostsProvider();
+    return StreamBuilder<QuerySnapshot>(
+      stream: _userId != null
+          ? postsProvider.getSpecificPostsStream(_userId)
+          : const Stream.empty(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text("Error: ${snapshot.error}"),
+          );
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text("No job posts available"),
+          );
+        }
 
-      final jobPosts = snapshot.data!.docs;
+        final jobPosts = snapshot.data!.docs;
 
-      return ListView.builder(
-        itemCount: jobPosts.length,
-        itemBuilder: (context, index) {
-          final jobPost = jobPosts[index];
+        return ListView.builder(
+          itemCount: jobPosts.length,
+          itemBuilder: (context, index) {
+            final jobPost = jobPosts[index];
 
-          String title = jobPost['title'];
-          String description = jobPost['description'];
-          bool isApplicationFull = jobPost['isApplicationFull'];
+            String title = jobPost['title'];
+            String description = jobPost['description'];
+            bool isApplicationFull = jobPost['isApplicationFull'];
 
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              color: const Color.fromARGB(255, 255, 255, 255),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              elevation: 4.0,
-              margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: CustomTextStyle.semiBoldText,
-                    ),
-                    Text(
-                      description,
-                      style: CustomTextStyle.regularText,
-                    ),
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: isApplicationFull
-                              ? () async {
-                                  // Set the job post as available
-                                  await Provider.of<PostsProvider>(context,
-                                          listen: false)
-                                      .setJobPostAsAvailable(jobPost.id);
-                                  setState(() {
-                                    isApplicationFull = false;
-                                  });
-                                }
-                              : () async {
-                                  // Set the job post as unavailable
-                                  await Provider.of<PostsProvider>(context,
-                                          listen: false)
-                                      .setJobPostAsUnavailable(jobPost.id);
-                                  setState(() {
-                                    isApplicationFull = true;
-                                  });
-                                },
-                          child: Text(isApplicationFull
-                              ? 'Make Available'
-                              : 'Set as Unavailable'),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ApplicantsPage(jobId: jobPost.id),
-                              ),
-                            );
-                          },
-                          child: Text('View Applicants'),
-                        ),
-                      ],
-                    ),
-                  ],
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Card(
+                color: const Color.fromARGB(255, 255, 255, 255),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                elevation: 4.0,
+                margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: CustomTextStyle.semiBoldText,
+                      ),
+                      Text(
+                        description,
+                        style: CustomTextStyle.regularText,
+                      ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: isApplicationFull
+                                ? () async {
+                                    // Set the job post as available
+                                    await Provider.of<PostsProvider>(context,
+                                            listen: false)
+                                        .setJobPostAsAvailable(jobPost.id);
+                                    setState(() {
+                                      isApplicationFull = false;
+                                    });
+                                  }
+                                : () async {
+                                    // Set the job post as unavailable
+                                    await Provider.of<PostsProvider>(context,
+                                            listen: false)
+                                        .setJobPostAsUnavailable(jobPost.id);
+                                    setState(() {
+                                      isApplicationFull = true;
+                                    });
+                                  },
+                            child: Text(isApplicationFull
+                                ? 'Make Available'
+                                : 'Set as Unavailable'),
+                          ),
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ApplicantsPage(jobId: jobPost.id),
+                                ),
+                              );
+                            },
+                            child: Text('View Applicants'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}}
+            );
+          },
+        );
+      },
+    );
+  }
+}

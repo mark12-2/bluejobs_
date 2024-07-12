@@ -2,6 +2,7 @@ import 'package:bluejobs/firebase_options.dart';
 import 'package:bluejobs/provider/auth_provider.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
+import 'package:bluejobs/provider/resetpass_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:bluejobs/screens_for_auth/signin.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => PostsProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+       ChangeNotifierProvider(create: (_) => PasswordResetProvider()),
       ],
       child: MaterialApp(
         title: 'Blue Jobs',
@@ -35,6 +37,9 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const SignInPage(),
+        routes: {
+    '/sign_in': (context) => const SignInPage(),
+  },
       ),
     );
   }

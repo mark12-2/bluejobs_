@@ -49,7 +49,7 @@ class AuthProvider with ChangeNotifier {
     try {
       UserCredential userCredential = await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
-      _uid = userCredential.user?.uid; // Set uid after successful sign up
+      _uid = userCredential.user?.uid; 
       _isSignedIn = true;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
@@ -86,32 +86,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // forgot password
-  Future<void> forgotPassword({required String email}) async {
-    try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
-    }
-  }
-
-  Future<void> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    try {
-      final user = _firebaseAuth.currentUser;
-      final cred = EmailAuthProvider.credential(
-        email: user!.email!,
-        password: currentPassword,
-      );
-
-      await user.reauthenticateWithCredential(cred);
-      await user.updatePassword(newPassword);
-    } catch (e) {
-      throw Exception('Error changing password: $e');
-    }
-  }
 
   // sign out
   Future<void> signOut() async {
@@ -135,7 +109,7 @@ class AuthProvider with ChangeNotifier {
       userModel.profilePic = profilePicUrl;
       userModel.createdAt = DateTime.now().millisecondsSinceEpoch.toString();
       userModel.email = _firebaseAuth.currentUser!.email!;
-      userModel.uid = _uid!; // Set uid before saving to Firestore
+      userModel.uid = _uid!; 
       _userModel = userModel;
 
       await _firebaseFirestore

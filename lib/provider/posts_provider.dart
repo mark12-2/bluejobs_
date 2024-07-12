@@ -88,7 +88,7 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> setJobPostAsAvailable(String postId) async {
     // Update the job post status in your database or API
-    await FirebaseFirestore.instance.collection('jobPosts').doc(postId).update({
+    await FirebaseFirestore.instance.collection('Posts').doc(postId).update({
       'isApplicationFull': false,
     });
   }
@@ -107,6 +107,10 @@ class PostsProvider with ChangeNotifier {
         .snapshots();
 
     return postsStream;
+  }
+
+  Future<void> refreshPosts() async {
+    getPostsStream();
   }
 
   // fetching users' own post
@@ -228,7 +232,7 @@ class PostsProvider with ChangeNotifier {
       "jobDescription": jobDescription,
       "employerId": employerId,
       "employerName": employerName,
-      "status": '',
+      "status": false,
       "timestamp": Timestamp.now(),
     });
   }
@@ -265,6 +269,13 @@ class PostsProvider with ChangeNotifier {
         .collection('Applicants')
         .doc(applicantId)
         .update({'isHired': isHired});
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(applicantId)
+        .collection('applications')
+        .doc(jobId)
+        .update({'status': isHired});
   }
 
   Future<void> removeApplicantFromJob(String jobId, String applicantId) async {

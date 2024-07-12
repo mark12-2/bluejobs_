@@ -132,28 +132,33 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> someNotification(
+ Future<void> someNotification(
       {required String receiverId,
       required String senderId,
-      required String senderName,
       required String title,
+      required String senderName,
       required String notif}) async {
     // Fetch the senderName from Firestore
     String? senderName;
     await FirebaseFirestore.instance
-        .collection('users')
-        .doc(senderId)
-        .get()
-        .then((value) => senderName = value.data()?['name']);
+       .collection('users')
+       .doc(senderId)
+       .get()
+       .then((value) {
+      final userData = value.data();
+      if (userData!= null) {
+        senderName = '${userData['firstName']} ${userData['middleName']} ${userData['lastName']} ${userData['suffix']}';
+      }
+    });
 
-    if (senderName != null) {
+    if (senderName!= null) {
       Notification notification = Notification(
         id: _firestore
-            .collection('users')
-            .doc(receiverId)
-            .collection('notifications')
-            .doc()
-            .id,
+           .collection('users')
+           .doc(receiverId)
+           .collection('notifications')
+           .doc()
+           .id,
         title: title,
         notif: notif,
         senderName: senderName!,
@@ -161,10 +166,10 @@ class NotificationProvider with ChangeNotifier {
       );
 
       await _firestore
-          .collection('users')
-          .doc(receiverId)
-          .collection('notifications')
-          .add(notification.toMap());
+         .collection('users')
+         .doc(receiverId)
+         .collection('notifications')
+         .add(notification.toMap());
     }
   }
 

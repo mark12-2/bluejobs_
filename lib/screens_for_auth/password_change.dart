@@ -1,9 +1,5 @@
-import 'package:bluejobs/provider/auth_provider.dart';
-import 'package:bluejobs/styles/custom_button.dart';
-import 'package:bluejobs/styles/custom_theme.dart';
-import 'package:bluejobs/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PasswordChange extends StatefulWidget {
   const PasswordChange({super.key});
@@ -13,117 +9,81 @@ class PasswordChange extends StatefulWidget {
 }
 
 class _PasswordChangeState extends State<PasswordChange> {
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmNewPasswordController = TextEditingController();
-
-  bool _isCurrentPasswordFocused = false;
-  bool _isNewPasswordFocused = false;
-  bool _isConfirmNewPasswordFocused = false;
-
-  @override
-  void dispose() {
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmNewPasswordController.dispose();
-    super.dispose();
-  }
+  final _formKey = GlobalKey<FormState>();
+  String _email = '';
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Change Password'),
+        title: Text('Forgot Password'),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _currentPasswordController,
-                focusNode: FocusNode(),
-                decoration: customInputDecoration('Current Password'),
-                obscureText: true,
-              ),
-              if (_isCurrentPasswordFocused)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Enter your current password',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Email'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!validateEmail(value)) {
+                      return 'Invalid email address';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _email = value ?? '',
                 ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _newPasswordController,
-                focusNode: FocusNode(),
-                decoration: customInputDecoration('New Password'),
-                obscureText: true,
-              ),
-              if (_isNewPasswordFocused)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Enter a new password',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _confirmNewPasswordController,
-                focusNode: FocusNode(),
-                decoration: customInputDecoration('Confirm New Password'),
-                obscureText: true,
-              ),
-              if (_isConfirmNewPasswordFocused)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Confirm your new password',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ),
-              SizedBox(height: 40),
-              CustomButton(
-                buttonText: 'Change Password',
-                onPressed: () {
-                  // Add logic to change password here
-                },
-              ),
-            ],
+                SizedBox(height: 20),
+                _loading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                        child: Text('Send password reset email'),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            setState(() {
+                              _loading = true;
+                            });
+                            await sendPasswordResetEmail(_email);
+                            setState(() {
+                              _loading = false;
+                            });
+                          }
+                        },
+                      ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  void changePassword() async {
-  if (_currentPasswordController.text.isEmpty ||
-      _newPasswordController.text.isEmpty ||
-      _confirmNewPasswordController.text.isEmpty) {
-    showSnackBar(context, 'Please fill in all fields');
-    return;
+  bool validateEmail(String email) {
+    // Add your email validation logic here
+    return email.contains('@') && email.contains('.');
   }
 
-  if (_newPasswordController.text != _confirmNewPasswordController.text) {
-    showSnackBar(context, 'New passwords do not match');
-    return;
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      showSnackBar(context, 'Password reset email sent');
+      // Redirect to login screen or show a success message
+      Navigator.pushReplacementNamed(context, '/sign_in');
+    } catch (e) {
+      showSnackBar(context, 'Error sending password reset email: $e');
+    }
   }
 
-  final ap = Provider.of<AuthProvider>(context, listen: false);
-  final user = ap.userModel;
-
-  try {
-    await ap.changePassword(
-      currentPassword: _currentPasswordController.text,
-      newPassword: _newPasswordController.text,
+  void showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
-
-    showSnackBar(context, 'Password changed successfully');
-    Navigator.pop(context);
-  } catch (e) {
-    showSnackBar(context, 'Error changing password: $e');
   }
-}
 }

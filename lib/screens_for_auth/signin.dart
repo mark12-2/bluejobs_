@@ -1,3 +1,4 @@
+import 'package:bluejobs/admin/admin_nav.dart';
 import 'package:bluejobs/navigation/employer_navigation.dart';
 import 'package:bluejobs/navigation/jobhunter_navigation.dart';
 import 'package:bluejobs/provider/auth_provider.dart';
@@ -153,6 +154,15 @@ class _SignInPageState extends State<SignInPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const JobhunterNavigation(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                        else if (role == 'admin') {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminNavigation(),
                             ),
                             (route) => false,
                           );

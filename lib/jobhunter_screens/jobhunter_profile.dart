@@ -87,10 +87,10 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Row(
+                child: Column(
                   children: [
                     buildProfilePicture(),
-                    const SizedBox(width: 20),
+                    const SizedBox(height: 10),
                     buildProfile(),
                   ],
                 ),
@@ -414,7 +414,10 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildResumeItem('Name', "${userLoggedIn.userModel.firstName} ${userLoggedIn.userModel.middleName} ${userLoggedIn.userModel.lastName} ${userLoggedIn.userModel.suffix}",),
+                  buildResumeItem(
+                    'Name',
+                    "${userLoggedIn.userModel.firstName} ${userLoggedIn.userModel.middleName} ${userLoggedIn.userModel.lastName} ${userLoggedIn.userModel.suffix}",
+                  ),
                   buildResumeItem('Sex', userLoggedIn.userModel.sex),
                   buildResumeItem('Birthday', userLoggedIn.userModel.birthdate),
                   buildResumeItem(
@@ -530,41 +533,50 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
 
                     return Card(
                       child: ListTile(
-                        title: Text(applicationData['jobTitle']),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(applicationData['jobDescription']),
-                            Text('Employer: ${applicationData['employerName']}',
-                                style: CustomTextStyle.roleRegularText),
-                          ],
-                        ),
-                        trailing: AbsorbPointer(
-                          child: GestureDetector(
-                            onTap: () async {
-                              await _postsProvider.updateApplicantStatus(
-                                applicationData['jobId'],
-                                applicationData['idOfApplicant'],
-                                applicationData['isHired'],
-                              );
-
-                              // Refresh the StreamBuilder
-                              snapshot.data!.docs[index].reference
-                                  .get()
-                                  .then((value) {
-                                setState(() {});
-                              });
-                            },
-                            child: Text(applicationData['status'] == ''
-                                ? 'Pending'
-                                : applicationData['status']),
+                          title: Text(applicationData['jobTitle']),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(applicationData['jobDescription']),
+                              Text(
+                                  'Employer: ${applicationData['employerName']}',
+                                  style: CustomTextStyle.roleRegularText),
+                            ],
                           ),
-                        ),
-                      ),
+                          trailing: AbsorbPointer(
+                            child: GestureDetector(
+                              onTap: () async {
+                                bool newIsHired = !applicationData['isHired'];
+                                await _postsProvider.updateApplicantStatus(
+                                  applicationData['jobId'],
+                                  applicationData['idOfApplicant'],
+                                  newIsHired,
+                                );
+
+                                snapshot.data!.docs[index].reference
+                                    .get()
+                                    .then((value) {
+                                  setState(() {
+                                    applicationData['isHired'] = newIsHired;
+                                    applicationData['status'] =
+                                        newIsHired ? 'Hired' : 'Pending';
+                                  });
+                                });
+                              },
+                              child: Text(
+                                applicationData['status'] ? 'Hired' : 'Pending',
+                                style: TextStyle(
+                                  color: applicationData['status']
+                                      ? Colors.green
+                                      : Colors.grey,
+                                ),
+                              ),
+                            ),
+                          )),
                     );
                   });
             } else {
-              return Center(
+              return const Center(
                 child: Text('No data available.'),
               );
             }
