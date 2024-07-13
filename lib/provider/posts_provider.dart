@@ -167,6 +167,7 @@ class PostsProvider with ChangeNotifier {
     Map<String, dynamic> commentData = {
       'commentText': commentText,
       'postId': postId,
+      'profilePic': currentUserDetails.profilePic,
       'username':
           "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}",
       'userId': currentUserDetails.uid,

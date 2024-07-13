@@ -8,14 +8,15 @@ class Notification {
   String notif;
   String senderName;
   bool isRead;
+  final Timestamp timestamp;
 
-  Notification({
-    required this.id,
-    required this.title,
-    required this.notif,
-    required this.senderName,
-    this.isRead = false,
-  });
+  Notification(
+      {required this.id,
+      required this.title,
+      required this.notif,
+      required this.senderName,
+      this.isRead = false,
+      required this.timestamp});
 
   factory Notification.fromMap(Map<String, dynamic> map) {
     return Notification(
@@ -24,6 +25,7 @@ class Notification {
       notif: map['notif'],
       senderName: map['senderName'],
       isRead: map['isRead'] ?? false,
+      timestamp: map['timestamp'],
     );
   }
 
@@ -34,6 +36,7 @@ class Notification {
       'notif': notif,
       'senderName': senderName,
       'isRead': isRead,
+      "timestamp": timestamp
     };
   }
 }
@@ -69,7 +72,7 @@ class NotificationProvider with ChangeNotifier {
       notifyListeners();
     });
 
-    // Fetch notifications from the notifications collection of the users who sent the notifications
+    // fetch notifications from the notifications collection of the users who sent the notifications
     _firestore
         .collection('users')
         .where('sentNotifications', arrayContains: userId)
@@ -109,67 +112,63 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void markAsRead() async {
+  Future<void> markAsRead() async {
     final userId = _auth.currentUser!.uid;
-    final batch = _firestore.batch();
 
-    final unreadNotifications =
-        _notifications.where((notification) => !notification.isRead).toList();
-
-    for (var notification in unreadNotifications) {
-      final notificationDoc = _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('notifications')
-          .doc(notification.id);
-      batch.update(notificationDoc, {
-        'isRead': true,
-        'readAt': FieldValue.serverTimestamp(),
-      });
-    }
-
-    _unreadNotifications = 0;
-    notifyListeners();
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false)
+        .get()
+        .then((querySnapshot) {
+      for (var doc in querySnapshot.docs) {
+        doc.reference.update({'isRead': true});
+      }
+    });
   }
 
- Future<void> someNotification(
-      {required String receiverId,
-      required String senderId,
-      required String title,
-      required String senderName,
-      required String notif}) async {
+  Future<void> someNotification({
+    required String receiverId,
+    required String senderId,
+    required String title,
+    required String senderName,
+    required String notif,
+  }) async {
     // Fetch the senderName from Firestore
     String? senderName;
     await FirebaseFirestore.instance
-       .collection('users')
-       .doc(senderId)
-       .get()
-       .then((value) {
+        .collection('users')
+        .doc(senderId)
+        .get()
+        .then((value) {
       final userData = value.data();
-      if (userData!= null) {
-        senderName = '${userData['firstName']} ${userData['middleName']} ${userData['lastName']} ${userData['suffix']}';
+      if (userData != null) {
+        senderName =
+            '${userData['firstName']} ${userData['middleName']} ${userData['lastName']} ${userData['suffix']}';
       }
     });
 
-    if (senderName!= null) {
+    if (senderName != null) {
       Notification notification = Notification(
         id: _firestore
-           .collection('users')
-           .doc(receiverId)
-           .collection('notifications')
-           .doc()
-           .id,
+            .collection('users')
+            .doc(receiverId)
+            .collection('notifications')
+            .doc()
+            .id,
         title: title,
         notif: notif,
         senderName: senderName!,
         isRead: false,
+        timestamp: Timestamp.now(),
       );
 
       await _firestore
-         .collection('users')
-         .doc(receiverId)
-         .collection('notifications')
-         .add(notification.toMap());
+          .collection('users')
+          .doc(receiverId)
+          .collection('notifications')
+          .add(notification.toMap());
     }
   }
 

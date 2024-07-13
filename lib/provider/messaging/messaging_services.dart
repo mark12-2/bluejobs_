@@ -32,78 +32,80 @@ class ChatService {
   }
 
   Future<String?> fetchUserName(String userId) async {
-  try {
-    final docSnap = await _firestore.collection('users').doc(userId).get();
-    if (docSnap.exists) {
-      final userData = docSnap.data();
-      final String fullName = '${userData?['firstName']} ${userData?['middleName']} ${userData?['lastName']} ${userData?['suffix']}';
-      return fullName;
-    } else {
-      debugPrint("User not found!");
+    try {
+      final docSnap = await _firestore.collection('users').doc(userId).get();
+      if (docSnap.exists) {
+        final userData = docSnap.data();
+        final String fullName =
+            '${userData?['firstName']} ${userData?['middleName']} ${userData?['lastName']} ${userData?['suffix']}';
+        return fullName;
+      } else {
+        debugPrint("User not found!");
+        return null;
+      }
+    } catch (e) {
+      debugPrint("Error fetching user name: $e");
       return null;
     }
-  } catch (e) {
-    debugPrint("Error fetching user name: $e");
-    return null;
   }
-}
 
-Future<void> sendMessage(String receiverId, String message) async {
-  try {
-    final currentUser = _auth.currentUser;
-    if (currentUser == null) {
-      debugPrint("No current user signed in.");
-      return;
-    }
-
-    final UserModel? currentUserDetails = await fetchCurrentUserDetails();
-    if (currentUserDetails == null) {
-      debugPrint("Current user details not found.");
-      return;
-    }
-
-    final String currentUserId = currentUser.uid;
-    final String currentUserName =
-        "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}";
-    final Timestamp timestamp = Timestamp.now();
-
-    final String? receiverName = await fetchUserName(receiverId);
-    if (receiverName == null) {
-      debugPrint("Receiver name not found.");
-      return;
-    }
-
-    final List<String> ids = [currentUserId, receiverId]..sort();
-    final String chatRoomId = ids.join('_');
-
-    // Create a new message
-    final Message newMessage = Message(
-      senderId: currentUserId,
-      senderName: currentUserName,
-      receiverId: receiverId,
-      message: message,
-      timestamp: timestamp,
-    );
-
-    // Store the other user's name in the message rooms collection
-    await _firestore.collection('message rooms').doc(chatRoomId).set({
-      'users': ids,
-      'userNames': {
-        currentUserId: currentUserName,
-        receiverId: receiverName,
+  Future<void> sendMessage(String receiverId, String message) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        debugPrint("No current user signed in.");
+        return;
       }
-    });
 
-    // Add new message to database
-    await _firestore
-        .collection('message rooms')
-        .doc(chatRoomId)
-        .collection('messages')
-        .add(newMessage.toMap());
-  } catch (e) {
-    debugPrint("Error sending message: $e");
+      final UserModel? currentUserDetails = await fetchCurrentUserDetails();
+      if (currentUserDetails == null) {
+        debugPrint("Current user details not found.");
+        return;
+      }
+
+      final String currentUserId = currentUser.uid;
+      final String currentUserName =
+          "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}";
+      final Timestamp timestamp = Timestamp.now();
+
+      final String? receiverName = await fetchUserName(receiverId);
+      if (receiverName == null) {
+        debugPrint("Receiver name not found.");
+        return;
+      }
+
+      final List<String> ids = [currentUserId, receiverId]..sort();
+      final String chatRoomId = ids.join('_');
+
+      // Create a new message
+      final Message newMessage = Message(
+        senderId: currentUserId,
+        senderName: currentUserName,
+        receiverId: receiverId,
+        message: message,
+        timestamp: timestamp,
+      );
+
+      // Store the other user's name in the message rooms collection
+      await _firestore.collection('message rooms').doc(chatRoomId).set({
+        'users': ids,
+        'userNames': {
+          currentUserId: currentUserName,
+          receiverId: receiverName,
+        }
+      });
+
+      // Add new message to database
+      await _firestore
+          .collection('message rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add(newMessage.toMap());
+    } catch (e) {
+      debugPrint("Error sending message: $e");
+    }
   }
-}
+
   Stream<QuerySnapshot> getMessages(String userId, String otherUserId) {
     final List<String> ids = [userId, otherUserId]..sort();
     final String chatRoomId = ids.join("_");
@@ -121,5 +123,20 @@ Future<void> sendMessage(String receiverId, String message) async {
         .collection('message rooms')
         .where('users', arrayContains: userId)
         .snapshots();
+  }
+
+  Future<void> sendMessageImage(String receiverId, String imageUrl) async {
+    final message = {
+      'senderId': _auth.currentUser!.uid,
+      'senderName': _auth.currentUser!.displayName ?? 'Unknown',
+      'message': imageUrl,
+      'timestamp': Timestamp.now(),
+    };
+
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(receiverId)
+        .collection('messages')
+        .add(message);
   }
 }

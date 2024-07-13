@@ -68,10 +68,9 @@ class _HomePageState extends State<HomePage> {
                       Icons.notifications,
                       color: Colors.white,
                     ),
-                    onPressed: () {
-                      if (notificationProvider.unreadNotifications > 0) {
-                        notificationProvider.markAsRead();
-                      }
+                    onPressed: () async {
+                      await notificationProvider.markAsRead();
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
