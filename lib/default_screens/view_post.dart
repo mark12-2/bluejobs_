@@ -22,6 +22,7 @@ class ViewPostPage extends StatefulWidget {
 }
 
 class _ViewPostPageState extends State<ViewPostPage> {
+  bool _isSaved = false;
   bool _isApplied = false;
   final _commentTextController = TextEditingController();
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -442,6 +443,36 @@ class _ViewPostPageState extends State<ViewPostPage> {
                                       },
                                     )
                                   : Container(), // return empty container if role is not 'Employer'
+                          InkWell(
+                            onTap: _isSaved
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _isSaved = true;
+                                    });
+                                  },
+                            child: Container(
+                              height: 53,
+                              width: 165,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.orange,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(5),
+                                color: Colors.white,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _isSaved ? 'Saved' : 'Save for Later',
+                                  style: CustomTextStyle.regularText.copyWith(
+                                    color: const Color.fromARGB(255, 0, 0, 0),
+                                    fontSize: responsiveSize(context, 0.03),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),

@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
   final _commentTextController = TextEditingController();
   bool _isApplied = false;
+  bool _isSaved = false;
 
   @override
   void dispose() {
@@ -44,7 +45,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final PostsProvider postDetails = Provider.of<PostsProvider>(context);
     final FirebaseAuth auth = FirebaseAuth.instance;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 27, 74, 109),
@@ -561,8 +561,12 @@ class _HomePageState extends State<HomePage> {
                                                                   color: isApplied
                                                                       ? Colors
                                                                           .grey
-                                                                      : Colors
-                                                                          .orange,
+                                                                      : const Color
+                                                                          .fromARGB(
+                                                                          255,
+                                                                          7,
+                                                                          30,
+                                                                          47),
                                                                   width: 2,
                                                                 ),
                                                                 borderRadius:
@@ -603,6 +607,63 @@ class _HomePageState extends State<HomePage> {
                                                         },
                                                       )
                                                     : Container(), // return empty container if role is not 'Employer'
+                                            const SizedBox(width: 10),
+                                            FutureBuilder(
+                                              future: postDetails.savePost(
+                                                  post.id,
+                                                  auth.currentUser!.uid),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.done) {
+                                                  _isSaved = true;
+                                                }
+                                                return InkWell(
+                                                  onTap: _isSaved
+                                                      ? null
+                                                      : () async {
+                                                          await postDetails
+                                                              .savePost(
+                                                                  post.id,
+                                                                  auth.currentUser!
+                                                                      .uid);
+                                                        },
+                                                  child: Container(
+                                                    height: 53,
+                                                    width: 165,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: _isSaved
+                                                            ? Colors.grey
+                                                            : Colors.orange,
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5),
+                                                      color: Colors.white,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        _isSaved
+                                                            ? 'Saved'
+                                                            : 'Save for Later',
+                                                        style: CustomTextStyle
+                                                            .regularText
+                                                            .copyWith(
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              255, 0, 0, 0),
+                                                          fontSize:
+                                                              responsiveSize(
+                                                                  context,
+                                                                  0.03),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            )
                                           ],
                                         ),
                                       ),

@@ -1,6 +1,7 @@
 import 'package:bluejobs/employer_screens/edit_jobpost.dart';
 import 'package:bluejobs/jobhunter_screens/edit_post.dart';
 import 'package:bluejobs/jobhunter_screens/resume_form.dart';
+import 'package:bluejobs/jobhunter_screens/saved_post.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:bluejobs/screens_for_auth/edit_user_information.dart';
@@ -59,6 +60,10 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                   value: 'signOut',
                   child: Text('Sign Out'),
                 ),
+                const PopupMenuItem(
+                  value: 'savedPosts',
+                  child: Text('Saved Posts'),
+                ),
               ],
               onSelected: (value) {
                 if (value == 'editProfile') {
@@ -77,6 +82,15 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                           ),
                         ),
                       );
+                }
+                if (value == 'savedPosts') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SavedPostsPage(userId: userLoggedIn.uid),
+                    ),
+                  );
                 }
               },
             )
@@ -107,26 +121,6 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
       ),
     );
   }
-
-  // Widget buildHeader() {
-  //   return Stack(
-  //     alignment: Alignment.center,
-  //     clipBehavior: Clip.none,
-  //     children: [
-  //       buildCoverImage(),
-  //       Positioned(
-  //         top: coverHeight - profileHeight / 2,
-  //         child: buildProfilePicture(),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // Widget buildCoverImage() => Container(
-  //       color: Colors.grey,
-  //       height: coverHeight,
-  //       width: double.infinity,
-  //     );
 
   Widget buildProfilePicture() {
     final userLoggedIn =

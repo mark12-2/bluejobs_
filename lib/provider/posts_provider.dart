@@ -287,4 +287,10 @@ class PostsProvider with ChangeNotifier {
         .doc(applicantId)
         .delete();
   }
+
+  Future<void> savePost(String postId, String userId) async {
+  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+  final savedPostsRef = userRef.collection('saved');
+  await savedPostsRef.doc(postId).set({'postId': postId});
+}
 }
