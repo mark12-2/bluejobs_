@@ -443,36 +443,60 @@ class _ViewPostPageState extends State<ViewPostPage> {
                                       },
                                     )
                                   : Container(), // return empty container if role is not 'Employer'
-                          InkWell(
-                            onTap: _isSaved
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _isSaved = true;
-                                    });
-                                  },
-                            child: Container(
-                              height: 53,
-                              width: 165,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.orange,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(5),
-                                color: Colors.white,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _isSaved ? 'Saved' : 'Save for Later',
-                                  style: CustomTextStyle.regularText.copyWith(
-                                    color: const Color.fromARGB(255, 0, 0, 0),
-                                    fontSize: responsiveSize(context, 0.03),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                          const SizedBox(width: 10),
+                          userId == auth.currentUser!.uid
+                              ? Container()
+                              : role == 'Employer'
+                                  ? FutureBuilder(
+                                      future: postDetails.savePost(
+                                          post.id, auth.currentUser!.uid),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.done) {
+                                          _isSaved = true;
+                                        }
+                                        return InkWell(
+                                          onTap: _isSaved
+                                              ? null
+                                              : () async {
+                                                  await postDetails.savePost(
+                                                      post.id,
+                                                      auth.currentUser!.uid);
+                                                },
+                                          child: Container(
+                                            height: 53,
+                                            width: 165,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: _isSaved
+                                                    ? Colors.grey
+                                                    : Colors.orange,
+                                                width: 2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              color: Colors.white,
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                _isSaved
+                                                    ? 'Saved'
+                                                    : 'Save for Later',
+                                                style: CustomTextStyle
+                                                    .regularText
+                                                    .copyWith(
+                                                  color: const Color.fromARGB(
+                                                      255, 0, 0, 0),
+                                                  fontSize: responsiveSize(
+                                                      context, 0.03),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Container(),
                         ],
                       ),
                     ),

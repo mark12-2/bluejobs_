@@ -608,6 +608,10 @@ class _HomePageState extends State<HomePage> {
                                                       )
                                                     : Container(), // return empty container if role is not 'Employer'
                                             const SizedBox(width: 10),
+                                              userId == auth.currentUser!.uid
+                                                ? Container()
+                                                : role == 'Employer'
+                                                    ? 
                                             FutureBuilder(
                                               future: postDetails.savePost(
                                                   post.id,
@@ -663,7 +667,7 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 );
                                               },
-                                            )
+                                            ):Container(),
                                           ],
                                         ),
                                       ),
