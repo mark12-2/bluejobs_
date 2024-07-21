@@ -293,4 +293,5 @@ class PostsProvider with ChangeNotifier {
   final savedPostsRef = userRef.collection('saved');
   await savedPostsRef.doc(postId).set({'postId': postId});
 }
+
 }

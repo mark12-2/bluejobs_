@@ -1,6 +1,5 @@
 import 'package:bluejobs/admin/admin_panel.dart';
-import 'package:bluejobs/admin/posts.dart';
-import 'package:bluejobs/admin/users.dart';
+import 'package:bluejobs/admin/logs.dart';
 import 'package:flutter/material.dart';
 
 class AdminNavigation extends StatefulWidget {
@@ -14,8 +13,7 @@ class _AdminNavigationState extends State<AdminNavigation> {
   int _selectedIndex = 0;
   List<Widget> defaultScreens = <Widget>[
     const AdminPanel(),
-    const Users(),
-    const Posts(),
+    const ActivityLogs(),
   ];
 
   @override
@@ -30,12 +28,8 @@ class _AdminNavigationState extends State<AdminNavigation> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_2),
-            label: 'Users',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Posts',
+            icon: Icon(Icons.book),
+            label: 'Activities',
           ),
         ],
         unselectedItemColor: Color.fromARGB(255, 19, 8, 8),
