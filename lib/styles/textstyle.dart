@@ -72,4 +72,10 @@ class CustomTextStyle {
     fontFamily: 'Poppins',
     color: Colors.black,
   );
+
+
+
+
+
+  
 }

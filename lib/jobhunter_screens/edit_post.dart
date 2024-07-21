@@ -151,12 +151,11 @@ class _EditPostState extends State<EditPost> {
           id: widget.postId,
           description: _description ?? _post?.description,
           type: _type ?? _post?.type,
-          // rate: _rate ?? _post?.rate,
         );
 
         final postsProvider =
             Provider.of<PostsProvider>(context, listen: false);
-        await postsProvider.updatePost(post);
+        await postsProvider.updatePost(widget.postId as Post, post);
 
         Navigator.pop(context);
       } catch (e) {

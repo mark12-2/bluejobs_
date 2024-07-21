@@ -33,12 +33,14 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
           FirebaseFirestore.instance.collection('Posts').doc(postId);
       final postDoc = await postRef.get();
       final postData = postDoc.data();
-      savedPosts.add(Post(
-        id: postId,
-        title: postData?['title'],
-        location: postData?['location'],
-        profilePicUrl: postData?['profilePic'],
-      ));
+      if (postData != null) {
+        savedPosts.add(Post(
+          id: postId,
+          title: postData['title'] ?? '',
+          location: postData['location'] ?? '',
+          profilePicUrl: postData['profilePic'] ?? '',
+        ));
+      }
     }
     setState(() {
       _savedPosts = savedPosts;
@@ -51,27 +53,31 @@ class _SavedPostsPageState extends State<SavedPostsPage> {
       appBar: AppBar(
         title: Text('Saved Posts'),
       ),
-      body: ListView.builder(
-        itemCount: _savedPosts.length,
-        itemBuilder: (context, index) {
-          final post = _savedPosts[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(post.profilePicUrl),
+      body: _savedPosts.isEmpty
+          ? Center(
+              child: Text('No saved posts'),
+            )
+          : ListView.builder(
+              itemCount: _savedPosts.length,
+              itemBuilder: (context, index) {
+                final post = _savedPosts[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(post.profilePicUrl),
+                  ),
+                  title: Text(post.title),
+                  subtitle: Text(post.location),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ViewPostPage(postId: post.id),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
-            title: Text(post.title),
-            subtitle: Text(post.location),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ViewPostPage(postId: post.id),
-                ),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }

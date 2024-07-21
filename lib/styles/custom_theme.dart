@@ -1,15 +1,15 @@
-// custom_input_decoration.dart
 import 'package:flutter/material.dart';
-import 'package:bluejobs/styles/textstyle.dart'; // Assuming this is where CustomTextStyle is defined
+import 'package:bluejobs/styles/textstyle.dart';
 
-InputDecoration customInputDecoration(String labelText,  {IconButton? suffixIcon})  {
- return InputDecoration(
+InputDecoration customInputDecoration(String labelText,
+    {IconButton? suffixIcon}) {
+  return InputDecoration(
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(5),
       borderSide: const BorderSide(color: Colors.black),
     ),
-    labelText: labelText, // Now labelText is defined
+    labelText: labelText, 
     labelStyle: CustomTextStyle.regularText,
-     suffixIcon: suffixIcon,
- );
+    suffixIcon: suffixIcon,
+  );
 }

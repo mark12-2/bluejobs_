@@ -130,7 +130,7 @@ class PostsProvider with ChangeNotifier {
 // }
 
 // update post method
-  Future<void> updatePost(Post post) async {
+  Future<void> updatePost(Post post, Post jobPostDetails) async {
     UserModel? currentUserDetails = await fetchCurrentUserDetails();
 
     if (currentUserDetails == null) {
