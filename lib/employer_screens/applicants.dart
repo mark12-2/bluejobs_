@@ -145,9 +145,6 @@ class _ApplicantsPageState extends State<ApplicantsPage> {
   void _deleteApplicant(String applicantId) async {
     await _postsProvider.removeApplicantFromJob(widget.jobId, applicantId);
 
-    // // Remove the job from the applicant's applied jobs list
-    // await _postsProvider.removeJobFromApplicant(applicantId, widget.jobId);
-
     print('Deleting $applicantId');
   }
 }

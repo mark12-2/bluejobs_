@@ -215,7 +215,7 @@ class _UserInformationState extends State<UserInformation> {
                           decoration: customInputDecoration('Phone Number'),
                           controller: _phoneController,
                           initialCountryCode:
-                              'PH', // Set the initial country code to Philippines
+                              'PH', 
                           onChanged: (phone) {},
                         ),
 
@@ -484,6 +484,7 @@ class _UserInformationState extends State<UserInformation> {
       profilePic: "",
       createdAt: "",
       phoneNumber: _phoneController.text.trim(),
+      isEnabled: true,
       uid: ap.uid,
     );
 

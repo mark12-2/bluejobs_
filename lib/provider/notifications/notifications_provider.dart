@@ -61,18 +61,25 @@ class NotificationProvider with ChangeNotifier {
     _notificationsCollection =
         _firestore.collection('users').doc(userId).collection('notifications');
 
-    // Fetch notifications from the current user's notifications collection
     _notificationsCollection.snapshots().listen((snapshot) {
       _notifications = snapshot.docs
           .map(
               (doc) => Notification.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
+
       _unreadNotifications =
           _notifications.where((notification) => !notification.isRead).length;
       notifyListeners();
     });
 
-    // fetch notifications from the notifications collection of the users who sent the notifications
+    _notificationsCollection
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .listen((snapshot) {
+      _unreadNotifications = snapshot.docs.length;
+      notifyListeners();
+    });
+
     _firestore
         .collection('users')
         .where('sentNotifications', arrayContains: userId)
@@ -125,6 +132,8 @@ class NotificationProvider with ChangeNotifier {
       for (var doc in querySnapshot.docs) {
         doc.reference.update({'isRead': true});
       }
+      _unreadNotifications = 0;
+      notifyListeners();
     });
   }
 
@@ -172,14 +181,12 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  Stream<QuerySnapshot> getNotificationsStream(String jobId) {
+  Stream<QuerySnapshot> getNotificationsStream() {
     final userId = _auth.currentUser!.uid;
     return _firestore
         .collection('users')
         .doc(userId)
         .collection('notifications')
-        .where('jobId', isEqualTo: jobId)
-        .where('notif', isEqualTo: 'Applied for the job')
         .snapshots();
   }
 }

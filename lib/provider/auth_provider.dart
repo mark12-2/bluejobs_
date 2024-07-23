@@ -49,7 +49,7 @@ class AuthProvider with ChangeNotifier {
     try {
       UserCredential userCredential = await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
-      _uid = userCredential.user?.uid; 
+      _uid = userCredential.user?.uid;
       _isSignedIn = true;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
@@ -86,7 +86,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-
   // sign out
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
@@ -109,7 +108,7 @@ class AuthProvider with ChangeNotifier {
       userModel.profilePic = profilePicUrl;
       userModel.createdAt = DateTime.now().millisecondsSinceEpoch.toString();
       userModel.email = _firebaseAuth.currentUser!.email!;
-      userModel.uid = _uid!; 
+      userModel.uid = _uid!;
       _userModel = userModel;
 
       await _firebaseFirestore
@@ -130,7 +129,7 @@ class AuthProvider with ChangeNotifier {
 
   // update user information
   Future<void> updateUserData({
-  required BuildContext context,
+    required BuildContext context,
     String? firstName,
     String? middleName,
     String? lastName,
@@ -179,53 +178,54 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-}
+  }
 
   // storing the image in firebase storage
   Future<String> storeFileToStorage(String ref, File file) async {
-  if (!file.existsSync()) {
-    throw Exception("File does not exist");
+    if (!file.existsSync()) {
+      throw Exception("File does not exist");
+    }
+    UploadTask uploadTask = _firebaseStorage.ref().child(ref).putFile(file);
+    TaskSnapshot snapshot = await uploadTask;
+    String downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
   }
-  UploadTask uploadTask = _firebaseStorage.ref().child(ref).putFile(file);
-  TaskSnapshot snapshot = await uploadTask;
-  String downloadUrl = await snapshot.ref.getDownloadURL();
-  return downloadUrl;
-}
 
   Future<void> getDataFromFirestore() async {
-  try {
-    await _firebaseFirestore
-        .collection("users")
-        .doc(_firebaseAuth.currentUser!.uid)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      if (snapshot.exists) {
-        _userModel = UserModel(
-          firstName: snapshot['firstName'],
-          middleName: snapshot['middleName'],
-          lastName: snapshot['lastName'],
-          suffix: snapshot['suffix'],
-          email: snapshot['email'],
-          role: snapshot['role'],
-          sex: snapshot['sex'],
-          address: snapshot['address'],
-          birthdate: snapshot['birthdate'],
-          createdAt: snapshot['createdAt'],
-          uid: snapshot['uid'],
-          profilePic: snapshot['profilePic'],
-          phoneNumber: snapshot['phoneNumber'],
-        );
-        _uid = userModel.uid;
-      } else {
-        // Handle the case where the user data is null
-        print("User data not found");
-      }
-    });
-  } catch (e) {
-    // Handle any exceptions that might occur
-    print("Error getting data from Firestore: $e");
+    try {
+      await _firebaseFirestore
+          .collection("users")
+          .doc(_firebaseAuth.currentUser!.uid)
+          .get()
+          .then((DocumentSnapshot snapshot) {
+        if (snapshot.exists) {
+          _userModel = UserModel(
+            firstName: snapshot['firstName'],
+            middleName: snapshot['middleName'],
+            lastName: snapshot['lastName'],
+            suffix: snapshot['suffix'],
+            email: snapshot['email'],
+            role: snapshot['role'],
+            sex: snapshot['sex'],
+            address: snapshot['address'],
+            birthdate: snapshot['birthdate'],
+            createdAt: snapshot['createdAt'],
+            uid: snapshot['uid'],
+            profilePic: snapshot['profilePic'],
+            phoneNumber: snapshot['phoneNumber'],
+            isEnabled: true
+          );
+          _uid = userModel.uid;
+        } else {
+          // Handle the case where the user data is null
+          print("User data not found");
+        }
+      });
+    } catch (e) {
+      // Handle any exceptions that might occur
+      print("Error getting data from Firestore: $e");
+    }
   }
-}
 
   Future saveUserDataToSP() async {
     SharedPreferences s = await SharedPreferences.getInstance();

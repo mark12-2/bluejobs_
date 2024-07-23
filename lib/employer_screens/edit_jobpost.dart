@@ -508,7 +508,7 @@ class _JobEditPostState extends State<JobEditPost> {
 
         final postsProvider =
             Provider.of<PostsProvider>(context, listen: false);
-        await postsProvider.updatePost(widget.postId as Post, post);
+        await postsProvider.updatePost(post);
 
         Navigator.pop(context);
       } catch (e) {

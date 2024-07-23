@@ -63,20 +63,54 @@ class _HomePageState extends State<HomePage> {
             builder: (context, notificationProvider, child) {
               return Stack(
                 children: <Widget>[
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications,
-                      color: Colors.white,
-                    ),
-                    onPressed: () async {
-                      await notificationProvider.markAsRead();
+                  StreamBuilder(
+                    stream: notificationProvider.getNotificationsStream(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        int unreadNotifications = snapshot.data!.docs
+                            .where((doc) => !doc['isRead'])
+                            .length;
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationsPage(),
-                        ),
-                      );
+                        return Stack(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.notifications,
+                                color: Colors.white,
+                              ),
+                              onPressed: () async {
+                                await notificationProvider.markAsRead();
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NotificationsPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            if (unreadNotifications > 0)
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      }
                     },
                   ),
                   if (notificationProvider.unreadNotifications > 0)
@@ -479,132 +513,125 @@ class _HomePageState extends State<HomePage> {
                                                           bool isApplied =
                                                               snapshot.data ??
                                                                   false;
-                                                          return GestureDetector(
-                                                            onTap: isApplied ||
-                                                                    postDetails
-                                                                        .isJobPostAvailable
-                                                                ? null
-                                                                : () async {
-                                                                    final notificationProvider = Provider.of<
-                                                                            NotificationProvider>(
-                                                                        context,
-                                                                        listen:
-                                                                            false);
-                                                                    String
-                                                                        receiverId =
-                                                                        userId;
-                                                                    String applicantName = auth
-                                                                            .currentUser!
-                                                                            .displayName ??
-                                                                        'Unknown';
-                                                                    String
-                                                                        applicantId =
-                                                                        auth.currentUser!
-                                                                            .uid;
+                                                          return FutureBuilder<
+                                                                  bool>(
+                                                              future:
+                                                                  _isPostUnavailable(
+                                                                      post.id),
+                                                              builder: (context,
+                                                                  postSnapshot) {
+                                                                bool
+                                                                    isApplicationFull =
+                                                                    postSnapshot
+                                                                            .data ??
+                                                                        false;
+                                                                return GestureDetector(
+                                                                  onTap: isApplied ||
+                                                                          isApplicationFull
+                                                                      ? null
+                                                                      : () async {
+                                                                          final notificationProvider = Provider.of<NotificationProvider>(
+                                                                              context,
+                                                                              listen: false);
+                                                                          String
+                                                                              receiverId =
+                                                                              userId;
+                                                                          String
+                                                                              applicantName =
+                                                                              auth.currentUser!.displayName ?? 'Unknown';
+                                                                          String
+                                                                              applicantId =
+                                                                              auth.currentUser!.uid;
 
-                                                                    await notificationProvider
-                                                                        .someNotification(
-                                                                      receiverId:
-                                                                          receiverId,
-                                                                      senderId: auth
-                                                                          .currentUser!
-                                                                          .uid,
-                                                                      senderName:
-                                                                          applicantName,
-                                                                      title:
-                                                                          'New Application',
-                                                                      notif:
-                                                                          ', applied to your job entitled "$title"',
-                                                                    );
-                                                                    await Provider.of<PostsProvider>(
-                                                                            context,
-                                                                            listen:
-                                                                                false)
-                                                                        .applyJob(
-                                                                      post.id,
-                                                                      title,
-                                                                      description,
-                                                                      userId,
-                                                                      name,
-                                                                    );
-
-                                                                    // Save the applicant's information to the job post
-                                                                    await Provider.of<PostsProvider>(
-                                                                            context,
-                                                                            listen:
-                                                                                false)
-                                                                        .addApplicant(
+                                                                          await notificationProvider
+                                                                              .someNotification(
+                                                                            receiverId:
+                                                                                receiverId,
+                                                                            senderId:
+                                                                                auth.currentUser!.uid,
+                                                                            senderName:
+                                                                                applicantName,
+                                                                            title:
+                                                                                'New Application',
+                                                                            notif:
+                                                                                ', applied to your job entitled "$title"',
+                                                                          );
+                                                                          await Provider.of<PostsProvider>(context, listen: false)
+                                                                              .applyJob(
                                                                             post.id,
-                                                                            applicantId,
-                                                                            applicantName);
+                                                                            title,
+                                                                            description,
+                                                                            userId,
+                                                                            name,
+                                                                          );
 
-                                                                    ScaffoldMessenger.of(
-                                                                            context)
-                                                                        .showSnackBar(
-                                                                      const SnackBar(
-                                                                          content:
-                                                                              Text('Successfully applied')),
-                                                                    );
+                                                                          await Provider.of<PostsProvider>(context, listen: false).addApplicant(
+                                                                              post.id,
+                                                                              applicantId,
+                                                                              applicantName);
 
-                                                                    setState(
-                                                                        () {
-                                                                      _isApplied =
-                                                                          true;
-                                                                    });
-                                                                  },
-                                                            child: Container(
-                                                              height: 53,
-                                                              width: 165,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                border:
-                                                                    Border.all(
-                                                                  color: isApplied
-                                                                      ? Colors
-                                                                          .grey
-                                                                      : const Color
-                                                                          .fromARGB(
-                                                                          255,
-                                                                          7,
-                                                                          30,
-                                                                          47),
-                                                                  width: 2,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            5),
-                                                                color: Colors
-                                                                    .white,
-                                                              ),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  postDetails
-                                                                          .isJobPostAvailable
-                                                                      ? (isApplied
-                                                                          ? 'Applied'
-                                                                          : 'Apply Job')
-                                                                      : 'Unavailable',
-                                                                  style: CustomTextStyle
-                                                                      .regularText
-                                                                      .copyWith(
-                                                                    color: isApplied
-                                                                        ? Colors
-                                                                            .grey
-                                                                        : const Color
-                                                                            .fromARGB(
-                                                                            255,
-                                                                            0,
-                                                                            0,
-                                                                            0),
-                                                                    fontSize: responsiveSize(
-                                                                        context,
-                                                                        0.03),
+                                                                          ScaffoldMessenger.of(context)
+                                                                              .showSnackBar(
+                                                                            const SnackBar(content: Text('Successfully applied')),
+                                                                          );
+
+                                                                          setState(
+                                                                              () {
+                                                                            _isApplied =
+                                                                                true;
+                                                                          });
+                                                                        },
+                                                                  child:
+                                                                      Container(
+                                                                    height: 53,
+                                                                    width: 165,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: isApplied ||
+                                                                                isApplicationFull
+                                                                            ? Colors
+                                                                                .grey
+                                                                            : const Color.fromARGB(
+                                                                                255,
+                                                                                7,
+                                                                                30,
+                                                                                47),
+                                                                        width:
+                                                                            2,
+                                                                      ),
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              5),
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        isApplicationFull
+                                                                            ? 'Unavailable'
+                                                                            : postDetails.isJobPostAvailable
+                                                                                ? (isApplied ? 'Applied' : 'Apply Job')
+                                                                                : 'Apply Job',
+                                                                        style: CustomTextStyle
+                                                                            .regularText
+                                                                            .copyWith(
+                                                                          color: isApplied || isApplicationFull
+                                                                              ? Colors.grey
+                                                                              : const Color.fromARGB(255, 0, 0, 0),
+                                                                          fontSize: responsiveSize(
+                                                                              context,
+                                                                              0.03),
+                                                                        ),
+                                                                      ),
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
+                                                                );
+                                                              });
                                                         },
                                                       )
                                                     : Container(),
@@ -612,28 +639,37 @@ class _HomePageState extends State<HomePage> {
                                             userId == auth.currentUser!.uid
                                                 ? Container()
                                                 : role == 'Employer'
-                                                    ? FutureBuilder(
-                                                        future: postDetails
-                                                            .savePost(
+                                                    ? FutureBuilder<bool>(
+                                                        future:
+                                                            _isPostAlreadySaved(
                                                                 post.id,
                                                                 auth.currentUser!
                                                                     .uid),
                                                         builder: (context,
                                                             snapshot) {
-                                                          if (snapshot
-                                                                  .connectionState ==
-                                                              ConnectionState
-                                                                  .done) {
-                                                            _isSaved = true;
-                                                          }
-                                                          return InkWell(
-                                                            onTap: _isSaved
+                                                          bool isSaved =
+                                                              snapshot.data ??
+                                                                  false;
+                                                          return GestureDetector(
+                                                            onTap: isSaved
                                                                 ? null
                                                                 : () async {
-                                                                    await postDetails.savePost(
+                                                                    final isSaved = await postDetails.isPostSaved(
                                                                         post.id,
                                                                         auth.currentUser!
                                                                             .uid);
+                                                                    if (!isSaved) {
+                                                                      await postDetails.savePost(
+                                                                          post
+                                                                              .id,
+                                                                          auth.currentUser!
+                                                                              .uid);
+                                                                      setState(
+                                                                          () {
+                                                                        _isSaved =
+                                                                            true;
+                                                                      });
+                                                                    }
                                                                   },
                                                             child: Container(
                                                               height: 53,
@@ -642,7 +678,7 @@ class _HomePageState extends State<HomePage> {
                                                                   BoxDecoration(
                                                                 border:
                                                                     Border.all(
-                                                                  color: _isSaved
+                                                                  color: isSaved
                                                                       ? Colors
                                                                           .grey
                                                                       : Colors
@@ -658,18 +694,21 @@ class _HomePageState extends State<HomePage> {
                                                               ),
                                                               child: Center(
                                                                 child: Text(
-                                                                  _isSaved
+                                                                  isSaved
                                                                       ? 'Saved'
                                                                       : 'Save for Later',
                                                                   style: CustomTextStyle
                                                                       .regularText
                                                                       .copyWith(
-                                                                    color: const Color
-                                                                        .fromARGB(
-                                                                        255,
-                                                                        0,
-                                                                        0,
-                                                                        0),
+                                                                    color: isSaved
+                                                                        ? Colors
+                                                                            .grey
+                                                                        : const Color
+                                                                            .fromARGB(
+                                                                            255,
+                                                                            0,
+                                                                            0,
+                                                                            0),
                                                                     fontSize: responsiveSize(
                                                                         context,
                                                                         0.03),
@@ -708,6 +747,23 @@ class _HomePageState extends State<HomePage> {
     return applicants != null && applicants.contains(userId);
   }
 
+  Future<bool> _isPostAlreadySaved(String postId, String userId) async {
+    final savedPostsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('saved')
+        .doc(postId);
+    final savedPostsDoc = await savedPostsRef.get();
+    return savedPostsDoc.exists;
+  }
+
+  Future<bool> _isPostUnavailable(String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+    final postDoc = await postRef.get();
+    final isApplicationFull = postDoc.get('isApplicationFull') as bool?;
+    return isApplicationFull ?? false;
+  }
+
   // adding a comment
   void addComment(BuildContext context, String postId) async {
     if (_commentTextController.text.isNotEmpty) {
@@ -731,7 +787,6 @@ class _HomePageState extends State<HomePage> {
     await Future.delayed(Duration(seconds: 1));
     _refreshIndicatorKey.currentState?.show();
 
-    // Refresh posts data
     final PostsProvider postDetails =
         Provider.of<PostsProvider>(context, listen: false);
     postDetails.refreshPosts();

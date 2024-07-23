@@ -138,5 +138,15 @@ class ChatService {
         .doc(receiverId)
         .collection('messages')
         .add(message);
+  
   }
+
+  Stream<QuerySnapshot> getNotificationsStream() {
+  final userId = _auth.currentUser!.uid;
+  return _firestore
+      .collection('users')
+      .doc(userId)
+      .collection('notifications')
+      .snapshots();
+}
 }

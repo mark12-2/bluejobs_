@@ -1,5 +1,8 @@
 import 'package:bluejobs/default_screens/view_post.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
+import 'package:provider/provider.dart';
+import 'package:bluejobs/provider/auth_provider.dart' as auth_provider;
+import 'package:bluejobs/screens_for_auth/signin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bluejobs/styles/custom_theme.dart';
@@ -50,6 +53,7 @@ class _AdminPanelState extends State<AdminPanel> {
         'profilePic': doc.get('profilePic') ?? '',
         'role': doc.get('role') ?? '',
         'uid': doc.get('uid') ?? '',
+        'isEnabled': doc.get('isEnabled') ?? false
       };
     }).toList();
     setState(() {
@@ -117,11 +121,29 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final userLoggedIn =
+        Provider.of<auth_provider.AuthProvider>(context, listen: false);
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Search'),
+          title: const Text('Admin Panel'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                userLoggedIn.userSignOut().then(
+                      (value) => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInPage(),
+                        ),
+                      ),
+                    );
+              },
+            ),
+          ],
           bottom: TabBar(
             tabs: const [
               Tab(text: 'Users'),
@@ -180,17 +202,17 @@ class _AdminPanelState extends State<AdminPanel> {
                               ),
                               title: Text(fullName),
                               subtitle: Text(user['role']),
-                              //                 trailing: user['isEnabled']
-                              // ? ElevatedButton(
-                              //     onPressed: () async {
-                              //       _disableUser(user['id']);
-                              //       setState(() {
-                              //         _filteredUsers[index]['isEnabled'] = false;
-                              //       });
-                              //     },
-                              //     child: Text('Disable Account'),
-                              //   )
-                              // : Text('Account Disabled'),
+                              trailing: user['isEnabled']
+                                  ? ElevatedButton(
+                                      onPressed: () async {
+                                        _disableUser(user['id']);
+                                        setState(() {
+                                          user['isEnabled'] = false;
+                                        });
+                                      },
+                                      child: Text('Disable Account'),
+                                    )
+                                  : Text('Account Disabled'),
                               onTap: () {
                                 Navigator.push(
                                   context,

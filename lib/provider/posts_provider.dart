@@ -87,7 +87,6 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> setJobPostAsAvailable(String postId) async {
-    // Update the job post status in your database or API
     await FirebaseFirestore.instance.collection('Posts').doc(postId).update({
       'isApplicationFull': false,
     });
@@ -130,7 +129,7 @@ class PostsProvider with ChangeNotifier {
 // }
 
 // update post method
-  Future<void> updatePost(Post post, Post jobPostDetails) async {
+  Future<void> updatePost(Post post) async {
     UserModel? currentUserDetails = await fetchCurrentUserDetails();
 
     if (currentUserDetails == null) {
@@ -288,10 +287,17 @@ class PostsProvider with ChangeNotifier {
         .delete();
   }
 
-  Future<void> savePost(String postId, String userId) async {
-  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-  final savedPostsRef = userRef.collection('saved');
-  await savedPostsRef.doc(postId).set({'postId': postId});
-}
+  Future<bool> savePost(String postId, String userId) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final savedPostsRef = userRef.collection('saved');
+    await savedPostsRef.doc(postId).set({'postId': postId, 'isSaved': true});
+    return true;
+  }
 
+  Future<bool> isPostSaved(String postId, String userId) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final savedPostsRef = userRef.collection('saved');
+    final postDoc = await savedPostsRef.doc(postId).get();
+    return postDoc.exists && postDoc.get('isSaved');
+  }
 }

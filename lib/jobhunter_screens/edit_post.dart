@@ -111,16 +111,9 @@ class _EditPostState extends State<EditPost> {
                         keyboardType: TextInputType.multiline,
                         onSaved: (value) => _type = value,
                       ),
+                      
                       const SizedBox(height: 20),
-                      // TextFormField(
-                      //   initialValue: _rate,
-                      //   decoration: customInputDecoration('Rate'),
-                      //   maxLines: 5,
-                      //   minLines: 1,
-                      //   keyboardType: TextInputType.multiline,
-                      //   onSaved: (value) => _rate = value,
-                      // ),
-                      // const SizedBox(height: 20),
+
                       Row(
                         children: [
                           ElevatedButton(
@@ -155,7 +148,7 @@ class _EditPostState extends State<EditPost> {
 
         final postsProvider =
             Provider.of<PostsProvider>(context, listen: false);
-        await postsProvider.updatePost(widget.postId as Post, post);
+        await postsProvider.updatePost(post);
 
         Navigator.pop(context);
       } catch (e) {

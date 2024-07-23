@@ -12,6 +12,7 @@ class UserModel {
   String createdAt;
   String phoneNumber;
   String uid;
+  bool isEnabled;
 
   UserModel({
     required this.firstName,
@@ -27,6 +28,7 @@ class UserModel {
     required this.createdAt,
     required this.phoneNumber,
     required this.uid,
+    required this.isEnabled
   });
 
   // from map
@@ -45,6 +47,7 @@ class UserModel {
       createdAt: map['createdAt'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       uid: map['uid'] ?? '',
+      isEnabled: map['isEnabled'] = true
     );
   }
 
@@ -66,6 +69,7 @@ class UserModel {
       "phoneNumber": phoneNumber,
       "createdAt": createdAt,
       "uid": uid,
+      "isEnabled": isEnabled
     };
   }
 }
