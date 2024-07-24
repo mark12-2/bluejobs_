@@ -128,6 +128,7 @@ class _SignInPageState extends State<SignInPage> {
                     final ap =
                         Provider.of<AuthProvider>(context, listen: false);
                     await ap.signInWithEmailAndPassword(
+                      context: context,
                       email: _emailController.text,
                       password: _passwordController.text,
                     );
@@ -157,8 +158,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             (route) => false,
                           );
-                        }
-                        else if (role == 'admin') {
+                        } else if (role == 'admin') {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(

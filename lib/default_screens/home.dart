@@ -160,6 +160,7 @@ class _HomePageState extends State<HomePage> {
 
                 return Expanded(
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: posts.length,
                     itemBuilder: (context, index) {
                       final post = posts[index];

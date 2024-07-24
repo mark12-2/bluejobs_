@@ -114,6 +114,11 @@ class _AdminPanelState extends State<AdminPanel> {
     await userRef.update({'isEnabled': false});
   }
 
+  void _enableUser(String userId) async {
+    final userRef = _firestore.collection('users').doc(userId);
+    await userRef.update({'isEnabled': true});
+  }
+
   void _deletePost(String postId) async {
     final postRef = _firestore.collection('Posts').doc(postId);
     await postRef.delete();
@@ -202,17 +207,22 @@ class _AdminPanelState extends State<AdminPanel> {
                               ),
                               title: Text(fullName),
                               subtitle: Text(user['role']),
-                              trailing: user['isEnabled']
-                                  ? ElevatedButton(
-                                      onPressed: () async {
-                                        _disableUser(user['id']);
-                                        setState(() {
-                                          user['isEnabled'] = false;
-                                        });
-                                      },
-                                      child: Text('Disable Account'),
-                                    )
-                                  : Text('Account Disabled'),
+                              trailing: ElevatedButton(
+                                onPressed: () async {
+                                  final isEnabled = user['isEnabled'];
+                                  if (isEnabled) {
+                                    _disableUser(user['id']);
+                                  } else {
+                                    _enableUser(user['id']);
+                                  }
+                                  setState(() {
+                                    user['isEnabled'] = !isEnabled;
+                                  });
+                                },
+                                child: Text(user['isEnabled']
+                                    ? 'Disable Account'
+                                    : 'Enable Account'),
+                              ),
                               onTap: () {
                                 Navigator.push(
                                   context,

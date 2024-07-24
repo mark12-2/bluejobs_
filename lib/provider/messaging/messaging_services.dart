@@ -84,6 +84,7 @@ class ChatService {
         receiverId: receiverId,
         message: message,
         timestamp: timestamp,
+        isRead: false
       );
 
       // Store the other user's name in the message rooms collection
@@ -149,4 +150,11 @@ class ChatService {
       .collection('notifications')
       .snapshots();
 }
+
+ Future<void> markMessageAsRead(String messageId) async {
+    await FirebaseFirestore.instance
+        .collection('messages')
+        .doc(messageId)
+        .update({'isRead': true});
+  }
 }

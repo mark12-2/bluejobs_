@@ -486,7 +486,6 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
                           ElevatedButton(
                             onPressed: isApplicationFull
                                 ? () async {
-                                    // Set the job post as available
                                     await Provider.of<PostsProvider>(context,
                                             listen: false)
                                         .setJobPostAsAvailable(jobPost.id);
@@ -495,7 +494,6 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
                                     });
                                   }
                                 : () async {
-                                    // Set the job post as unavailable
                                     await Provider.of<PostsProvider>(context,
                                             listen: false)
                                         .setJobPostAsUnavailable(jobPost.id);
