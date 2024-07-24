@@ -44,6 +44,7 @@ class _EditUserInformationState extends State<EditUserInformation> {
     _birthdayController.dispose();
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -147,6 +148,7 @@ class _EditUserInformationState extends State<EditUserInformation> {
                             decoration:
                                 customInputDecoration('Middle Name (Optional)'),
                           ),
+                          const SizedBox(height: 20),
                           TextField(
                             // suffix input
                             controller: _suffixController,

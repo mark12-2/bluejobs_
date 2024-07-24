@@ -4,6 +4,7 @@ class Message {
   final String senderId;
   final String senderName;
   final String receiverId;
+  String? profilePic;
   final String message;
   final Timestamp timestamp;
   bool isRead;
@@ -12,6 +13,7 @@ class Message {
     required this.senderId,
     required this.senderName,
     required this.receiverId,
+    this.profilePic,
     required this.message,
     required this.timestamp,
     required this.isRead
@@ -22,6 +24,7 @@ class Message {
       'senderId': senderId,
       'senderName': senderName,
       'receiverId': receiverId,
+      "profilePic": profilePic,
       'message': message,
       "timestamp": timestamp,
       'isRead': isRead
@@ -33,6 +36,7 @@ class Message {
       senderId: map['senderId'],
       senderName: map['senderName'],
       receiverId: map['receiverId'],
+      profilePic: map['profilePic'],
       message: map['message'],
       timestamp: map['timestamp'],
       isRead: map['isRead']

@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
-import 'package:bluejobs/provider/notifications/notifications_provider.dart' as notifications;
+import 'package:bluejobs/provider/notifications/notifications_provider.dart'
+    as notifications;
 
 class NotificationsPage extends StatelessWidget {
-
-
   const NotificationsPage({super.key});
 
   @override
@@ -18,7 +17,8 @@ class NotificationsPage extends StatelessWidget {
         title: const Text('Notifications'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: Provider.of<NotificationProvider>(context, listen: false).getNotificationsStream(),
+        stream: Provider.of<NotificationProvider>(context, listen: false)
+            .getNotificationsStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
@@ -35,8 +35,11 @@ class NotificationsPage extends StatelessWidget {
               return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  final notificationData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                  final notification = notifications.Notification.fromMap(notificationData);
+                  final notificationData = snapshot
+                      .data!.docs[snapshot.data!.docs.length - 1 - index]
+                      .data() as Map<String, dynamic>;
+                  final notification =
+                      notifications.Notification.fromMap(notificationData);
                   Timestamp timestamp = notification.timestamp;
                   DateTime dateTime = timestamp.toDate();
 

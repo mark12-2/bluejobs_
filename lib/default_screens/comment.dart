@@ -14,10 +14,8 @@ class CommentScreen extends StatefulWidget {
   State<CommentScreen> createState() => _CommentScreenState();
 }
 
-
 class _CommentScreenState extends State<CommentScreen> {
   final _commentTextController = TextEditingController();
-  
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +49,10 @@ class _CommentScreenState extends State<CommentScreen> {
                           FirebaseAuth.instance.currentUser?.uid;
 
                       return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage:
+                              NetworkImage(commentSnapshot['profilePic']),
+                        ),
                         title: Text(commentSnapshot['username']),
                         subtitle: Text(commentSnapshot['commentText']),
                         trailing: Row(
@@ -64,7 +66,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                       deleteComment(commentSnapshot.id);
                                     },
                                   )
-                                : Container(), 
+                                : Container(),
                           ],
                         ),
                       );
@@ -105,7 +107,6 @@ class _CommentScreenState extends State<CommentScreen> {
     );
   }
 
-  // adding a comment
   void addComment(BuildContext context, String postId) async {
     if (_commentTextController.text.isNotEmpty) {
       String comment = _commentTextController.text;
@@ -113,12 +114,10 @@ class _CommentScreenState extends State<CommentScreen> {
       try {
         await Provider.of<PostsProvider>(context, listen: false)
             .addComment(comment, postId);
-        // You can add a success message here if you want
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Comment added successfully')),
         );
       } catch (e) {
-        // Handle errors here
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to add comment: $e')),
         );
@@ -126,7 +125,6 @@ class _CommentScreenState extends State<CommentScreen> {
     }
   }
 
-  // deleting a comment
   void deleteComment(String commentId) async {
     try {
       await FirebaseFirestore.instance
@@ -135,12 +133,10 @@ class _CommentScreenState extends State<CommentScreen> {
           .collection('Comments')
           .doc(commentId)
           .delete();
-      // You can add a success message here if you want
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Comment deleted successfully')),
       );
     } catch (e) {
-      // Handle errors here
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to delete comment: $e')),
       );

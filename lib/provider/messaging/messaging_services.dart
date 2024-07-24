@@ -82,6 +82,7 @@ class ChatService {
         senderId: currentUserId,
         senderName: currentUserName,
         receiverId: receiverId,
+        profilePic: currentUserDetails.profilePic,
         message: message,
         timestamp: timestamp,
         isRead: false
@@ -126,21 +127,21 @@ class ChatService {
         .snapshots();
   }
 
-  Future<void> sendMessageImage(String receiverId, String imageUrl) async {
-    final message = {
-      'senderId': _auth.currentUser!.uid,
-      'senderName': _auth.currentUser!.displayName ?? 'Unknown',
-      'message': imageUrl,
-      'timestamp': Timestamp.now(),
-    };
+  // Future<void> sendMessageImage(String receiverId, String imageUrl) async {
+  //   final message = {
+  //     'senderId': _auth.currentUser!.uid,
+  //     'senderName': _auth.currentUser!.displayName ?? 'Unknown',
+  //     'message': imageUrl,
+  //     'timestamp': Timestamp.now(),
+  //   };
 
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(receiverId)
-        .collection('messages')
-        .add(message);
+  //   await FirebaseFirestore.instance
+  //       .collection('chats')
+  //       .doc(receiverId)
+  //       .collection('messages')
+  //       .add(message);
   
-  }
+  // }
 
   Stream<QuerySnapshot> getNotificationsStream() {
   final userId = _auth.currentUser!.uid;
