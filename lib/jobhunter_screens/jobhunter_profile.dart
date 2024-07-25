@@ -408,6 +408,10 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text('Bio Data',
+                      style: CustomTextStyle.typeRegularText
+                          .copyWith(fontSize: responsiveSize(context, 0.03))),
+                  const SizedBox(height: 15),
                   buildResumeItem(
                     'Name',
                     "${userLoggedIn.userModel.firstName} ${userLoggedIn.userModel.middleName} ${userLoggedIn.userModel.lastName} ${userLoggedIn.userModel.suffix}",
@@ -418,6 +422,11 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                       'Contacts', userLoggedIn.userModel.phoneNumber),
                   buildResumeItem('Email', userLoggedIn.userModel.email ?? ''),
                   buildResumeItem('Address', userLoggedIn.userModel.address),
+                  const SizedBox(height: 15),
+                  Text('Background Details',
+                      style: CustomTextStyle.typeRegularText
+                          .copyWith(fontSize: responsiveSize(context, 0.03))),
+                  const SizedBox(height: 15),
                   buildResumeItem('Skills', resumeData['skills'] ?? ''),
                   buildResumeItem('Experience', resumeData['experience'] ?? ''),
                   buildResumeItem(
@@ -432,7 +441,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                           ),
                         );
                       },
-                      child: Text('Add or Edit Resume Details'))
+                      child: Text('Add or Edit Details'))
                 ],
               ),
             ),
