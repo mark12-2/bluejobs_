@@ -49,6 +49,22 @@ class ChatService {
     }
   }
 
+  Future<String?> fetchUserProfilePicture(String userId) async {
+    try {
+      final docSnap = await _firestore.collection('users').doc(userId).get();
+      if (docSnap.exists) {
+        final userData = docSnap.data();
+        return userData?['profilePic'];
+      } else {
+        debugPrint("User not found!");
+        return null;
+      }
+    } catch (e) {
+      debugPrint("Error fetching user profile picture: $e");
+      return null;
+    }
+  }
+
   Future<void> sendMessage(String receiverId, String message) async {
     try {
       final currentUser = _auth.currentUser;
@@ -66,6 +82,8 @@ class ChatService {
       final String currentUserId = currentUser.uid;
       final String currentUserName =
           "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}";
+      final String? receiverProfilePicture =
+          await fetchUserProfilePicture(receiverId);
       final Timestamp timestamp = Timestamp.now();
 
       final String? receiverName = await fetchUserName(receiverId);
@@ -77,27 +95,26 @@ class ChatService {
       final List<String> ids = [currentUserId, receiverId]..sort();
       final String chatRoomId = ids.join('_');
 
-      // Create a new message
       final Message newMessage = Message(
-        senderId: currentUserId,
-        senderName: currentUserName,
-        receiverId: receiverId,
-        profilePic: currentUserDetails.profilePic,
-        message: message,
-        timestamp: timestamp,
-        isRead: false
-      );
+          senderId: currentUserId,
+          senderName: currentUserName,
+          receiverId: receiverId,
+          message: message,
+          timestamp: timestamp,
+          isRead: false);
 
-      // Store the other user's name in the message rooms collection
       await _firestore.collection('message rooms').doc(chatRoomId).set({
         'users': ids,
         'userNames': {
           currentUserId: currentUserName,
           receiverId: receiverName,
+        },
+        'profilePics': {
+          currentUserId: currentUserDetails.profilePic,
+          receiverId: receiverProfilePicture,
         }
       });
 
-      // Add new message to database
       await _firestore
           .collection('message rooms')
           .doc(chatRoomId)
@@ -127,32 +144,16 @@ class ChatService {
         .snapshots();
   }
 
-  // Future<void> sendMessageImage(String receiverId, String imageUrl) async {
-  //   final message = {
-  //     'senderId': _auth.currentUser!.uid,
-  //     'senderName': _auth.currentUser!.displayName ?? 'Unknown',
-  //     'message': imageUrl,
-  //     'timestamp': Timestamp.now(),
-  //   };
-
-  //   await FirebaseFirestore.instance
-  //       .collection('chats')
-  //       .doc(receiverId)
-  //       .collection('messages')
-  //       .add(message);
-  
-  // }
-
   Stream<QuerySnapshot> getNotificationsStream() {
-  final userId = _auth.currentUser!.uid;
-  return _firestore
-      .collection('users')
-      .doc(userId)
-      .collection('notifications')
-      .snapshots();
-}
+    final userId = _auth.currentUser!.uid;
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .snapshots();
+  }
 
- Future<void> markMessageAsRead(String messageId) async {
+  Future<void> markMessageAsRead(String messageId) async {
     await FirebaseFirestore.instance
         .collection('messages')
         .doc(messageId)

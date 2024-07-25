@@ -84,8 +84,7 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.white,
                               ),
                               onPressed: () async {
-                                await notificationProvider.markAsRead();
-
+                               
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

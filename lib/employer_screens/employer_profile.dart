@@ -387,15 +387,68 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildResumeItem('√', userLoggedIn.userModel.role),
-            buildResumeItem('Sex', userLoggedIn.userModel.sex),
-            buildResumeItem('Birthday', userLoggedIn.userModel.birthdate),
-            buildResumeItem(
-                'Contact Number', userLoggedIn.userModel.phoneNumber),
-            buildResumeItem('Email', userLoggedIn.userModel.email ?? ''),
-            buildResumeItem('Address', userLoggedIn.userModel.address),
+            buildAboutItem(Icons.badge, 'Role', userLoggedIn.userModel.role),
+            buildAboutItem(
+                Icons.transgender, 'Sex', userLoggedIn.userModel.sex),
+            buildAboutItem(
+                Icons.cake, 'Birthday', userLoggedIn.userModel.birthdate),
+            buildAboutItem(Icons.phone, 'Contact Number',
+                userLoggedIn.userModel.phoneNumber),
+            buildAboutItem(
+                Icons.email, 'Email', userLoggedIn.userModel.email ?? ''),
+            buildAboutItem(
+                Icons.location_on, 'Address', userLoggedIn.userModel.address),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditUserInformation(),
+                  ),
+                );
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.edit),
+                  SizedBox(width: 10),
+                  Text(
+                    'Edit Profile',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildAboutItem(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Row(
+        children: [
+          Icon(icon),
+          SizedBox(width: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Spacer(),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
     );
   }

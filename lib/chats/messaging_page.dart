@@ -63,16 +63,13 @@ class _MessagingPageState extends State<MessagingPage> {
                         .firstWhere((userId) => userId != currentUser.uid);
                     final otherUserName =
                         chatRoomData['userNames'][otherUserId];
-
-                    // Get the last message
-                    // final messages = chatRoomData['messages'];
-                    // String lastMessageText = 'No messages';
-                    // if (messages != null && messages.isNotEmpty) {
-                    //   final lastMessage = messages.last;
-                    //   lastMessageText = lastMessage['message'];
-                    // }
+                    final otherUserProfilePic =
+                        chatRoomData['profilePics'][otherUserId];
 
                     return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(otherUserProfilePic),
+                      ),
                       title: Text(
                         otherUserName,
                         style: CustomTextStyle.semiBoldText

@@ -12,9 +12,18 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final notificationProvider =
+        Provider.of<NotificationProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () async {
+            await notificationProvider.markAsRead();
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: Provider.of<NotificationProvider>(context, listen: false)
@@ -34,10 +43,10 @@ class NotificationsPage extends StatelessWidget {
 
               return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
+                reverse: false,
                 itemBuilder: (context, index) {
-                  final notificationData = snapshot
-                      .data!.docs[snapshot.data!.docs.length - 1 - index]
-                      .data() as Map<String, dynamic>;
+                  final notificationData =
+                      snapshot.data!.docs[index].data() as Map<String, dynamic>;
                   final notification =
                       notifications.Notification.fromMap(notificationData);
                   Timestamp timestamp = notification.timestamp;

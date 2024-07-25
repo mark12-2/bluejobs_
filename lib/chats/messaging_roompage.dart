@@ -16,15 +16,14 @@ class MessagingBubblePage extends StatelessWidget {
       {super.key, required this.receiverName, required this.receiverId});
 
   final TextEditingController _messageController = TextEditingController();
-
   final ChatService _chatService = ChatService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ScrollController _scrollController = ScrollController();
 
   void sendMessage(BuildContext context) async {
     if (_messageController.text.isNotEmpty) {
       await _chatService.sendMessage(receiverId, _messageController.text);
 
-      // Send notification
       final notificationProvider =
           Provider.of<NotificationProvider>(context, listen: false);
       await notificationProvider.someNotification(
@@ -32,11 +31,14 @@ class MessagingBubblePage extends StatelessWidget {
         senderId: _auth.currentUser!.uid,
         senderName: _auth.currentUser!.displayName ?? 'Unknown',
         title: 'New Message',
-        notif: ' sent you a message: "${_messageController.text}"',
+        notif: 'sent you a message: "${_messageController.text}"',
       );
-
-      // clear message after sending
       _messageController.clear();
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 300),
+      );
     }
   }
 
@@ -46,8 +48,31 @@ class MessagingBubblePage extends StatelessWidget {
       appBar: AppBar(title: Text(receiverName)),
       body: Column(
         children: [
-          // display messsages
-          Expanded(child: _buildMessageList()),
+          Expanded(
+            child: StreamBuilder(
+              stream:
+                  _chatService.getMessages(receiverId, _auth.currentUser!.uid),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text('Error');
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text('Loading...');
+                }
+
+                List<DocumentSnapshot> messages = snapshot.data!.docs;
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: messages.length,
+                  reverse: false,
+                  itemBuilder: (context, index) {
+                    return _buildMessageItem(context, messages[index]);
+                  },
+                );
+              },
+            ),
+          ),
           // user input
           _buildUserInput(context),
         ],
@@ -55,33 +80,12 @@ class MessagingBubblePage extends StatelessWidget {
     );
   }
 
-  // build message list
-  Widget _buildMessageList() {
-    String senderId = _auth.currentUser!.uid;
-    return StreamBuilder(
-        stream: _chatService.getMessages(receiverId, senderId),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Error');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text('Loading...');
-          }
-
-          return ListView(
-            children: snapshot.data!.docs
-                .map((doc) => _buildMessageItem(context, doc))
-                .toList(),
-          );
-        });
-  }
-
   Widget _buildMessageItem(BuildContext context, DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     var alignment = (data['senderId'] == _auth.currentUser!.uid)
-        ? Alignment.centerRight
-        : Alignment.centerLeft;
+        ? Alignment.topRight
+        : Alignment.topLeft;
 
     Timestamp timestamp = data['timestamp'];
     DateTime dateTime = timestamp.toDate();
@@ -103,9 +107,14 @@ class MessagingBubblePage extends StatelessWidget {
                   data['senderName'],
                   style: CustomTextStyle.chatusernameRegularText,
                 ),
-          Chatbubble(
-            message: data['message'],
-          ),
+          ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75),
+              child: Chatbubble(
+                message: data['message'],
+                image: data['image'],
+                isSender: data['senderId'] == _auth.currentUser!.uid,
+              )),
           Text(formattedTimestamp),
         ]),
       ),
