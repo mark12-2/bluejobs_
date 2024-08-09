@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class Chatbubble extends StatelessWidget {
   final String message;
   final String? image;
-  final bool isSender; // Add this parameter
+  final bool isSender;
 
   const Chatbubble(
       {super.key, required this.message, this.image, required this.isSender});
@@ -15,7 +15,7 @@ class Chatbubble extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isSender
-            ? Color.fromARGB(255, 19, 52, 77)
+            ? const Color.fromARGB(255, 19, 52, 77)
             : const Color.fromARGB(255, 243, 107, 4),
         borderRadius: BorderRadius.circular(8),
       ),

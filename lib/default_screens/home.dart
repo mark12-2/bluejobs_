@@ -1,5 +1,6 @@
 import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/default_screens/comment.dart';
+import 'package:bluejobs/default_screens/find_others.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
@@ -84,7 +85,6 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.white,
                               ),
                               onPressed: () async {
-                               
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -126,6 +126,16 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                 ],
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.find_in_page),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FindOthersPage()),
               );
             },
           ),
@@ -309,8 +319,7 @@ class _HomePageState extends State<HomePage> {
                                                             text:
                                                                 '$lat, $lon'));
                                                   },
-                                                  child: Text(
-                                                      "$location (tap to view location)",
+                                                  child: Text("$location",
                                                       style: const TextStyle(
                                                           color: Colors.blue)),
                                                 ),

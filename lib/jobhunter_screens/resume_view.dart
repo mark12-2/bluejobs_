@@ -70,19 +70,19 @@ class _JobHunterResumeViewState extends State<JobHunterResumeView> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Row(
+                    child: Column(
                       children: [
                         buildProfilePicture(),
-                        const SizedBox(width: 20),
+                        const SizedBox(height: 10),
                         buildProfile(),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    height: 1, 
-                    width: double.infinity, 
-                    color: Colors.black, 
+                    height: 1,
+                    width: double.infinity,
+                    color: Colors.black,
                   ),
                   SizedBox(
                     height: 500,
@@ -122,7 +122,7 @@ class _JobHunterResumeViewState extends State<JobHunterResumeView> {
         ),
         Text(
           userData?['role'] ?? '',
-          style: CustomTextStyle.typeRegularText,
+          style: CustomTextStyle.roleRegularText,
         ),
       ],
     );
@@ -143,49 +143,71 @@ class _JobHunterResumeViewState extends State<JobHunterResumeView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text('Bio Data',
+                      style: CustomTextStyle.typeRegularText
+                          .copyWith(fontSize: responsiveSize(context, 0.03))),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
                       buildResumeItem(
-                          'Name', '$firstName $middleName $lastName $suffix'),
+                          'Name',
+                          '$firstName $middleName $lastName $suffix',
+                          Icons.person),
                     ],
                   ),
-                  buildResumeItem('Sex', userData?['sex'] ?? ''),
-                  buildResumeItem('Birthday', userData?['birthdate'] ?? ''),
-                  buildResumeItem('Contacts', userData?['phoneNumber'] ?? ''),
-                  buildResumeItem('Email', userData?['email'] ?? ''),
-                  buildResumeItem('Address', userData?['address'] ?? ''),
-                  buildResumeItem('Skills', resumeData?['skills'] ?? ''),
+                  buildResumeItem('Sex', userData?['sex'] ?? '', Icons.male),
                   buildResumeItem(
-                      'Experience', resumeData?['experience'] ?? ''),
+                      'Birthday', userData?['birthdate'] ?? '', Icons.cake),
                   buildResumeItem(
-                      'Expected Salary', resumeData?['expectedSalary'] ?? ''),
+                      'Contacts', userData?['phoneNumber'] ?? '', Icons.phone),
+                  buildResumeItem(
+                      'Email', userData?['email'] ?? '', Icons.email),
+                  buildResumeItem(
+                      'Address', userData?['address'] ?? '', Icons.location_on),
+                  const SizedBox(height: 15),
+                  Text('Backgound Details',
+                      style: CustomTextStyle.typeRegularText
+                          .copyWith(fontSize: responsiveSize(context, 0.03))),
+                  const SizedBox(height: 15),
+                  buildResumeItem(
+                      'Skills', resumeData?['skills'] ?? '', Icons.work),
+                  buildResumeItem('Experience', resumeData?['experience'] ?? '',
+                      Icons.business),
+                  buildResumeItem('Expected Salary',
+                      resumeData?['expectedSalary'] ?? '', Icons.attach_money),
                 ],
               ),
             ),
           );
   }
 
-  Widget buildResumeItem(String title, String content) {
+  Widget buildResumeItem(String title, String content, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '$title: ',
-              style: CustomTextStyle.regularText.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: responsiveSize(context, 0.03),
-              ),
+      child: Row(
+        children: [
+          Icon(icon, size: responsiveSize(context, 0.03)),
+          SizedBox(width: 10),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '$title: ',
+                  style: CustomTextStyle.regularText.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: responsiveSize(context, 0.03),
+                  ),
+                ),
+                TextSpan(
+                  text: content,
+                  style: CustomTextStyle.regularText.copyWith(
+                    fontSize: responsiveSize(context, 0.03),
+                  ),
+                ),
+              ],
             ),
-            TextSpan(
-              text: content,
-              style: CustomTextStyle.regularText.copyWith(
-                fontSize: responsiveSize(context, 0.03),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

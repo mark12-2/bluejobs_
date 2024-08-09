@@ -37,11 +37,11 @@ class AuthProvider with ChangeNotifier {
 
   // sett user as sign in
   Future setSignIn() async {
-  final SharedPreferences s = await SharedPreferences.getInstance();
-  s.setBool("is_signedin", false);
-  _isSignedIn = false;
-  notifyListeners();
-}
+    final SharedPreferences s = await SharedPreferences.getInstance();
+    s.setBool("is_signedin", false);
+    _isSignedIn = false;
+    notifyListeners();
+  }
 
   // sign up with email and password
   Future<void> signUpWithEmailAndPassword(
@@ -50,42 +50,71 @@ class AuthProvider with ChangeNotifier {
       UserCredential userCredential = await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
       _uid = userCredential.user?.uid;
-      _isSignedIn = true;
+
+      await userCredential.user?.sendEmailVerification();
+
+      _isSignedIn = false;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message);
     }
   }
 
+// check if user's email is verified
+  Future<bool> isEmailVerified() async {
+    if (_firebaseAuth.currentUser != null) {
+      await _firebaseAuth.currentUser?.reload();
+      return _firebaseAuth.currentUser?.emailVerified ?? false;
+    } else {
+      return false;
+    }
+  }
+
   // sign in with email and password
   Future<void> signInWithEmailAndPassword(
-    {required String email, required String password, required context}) async {
-  try {
-    UserCredential userCredential = await _firebaseAuth
-        .signInWithEmailAndPassword(email: email, password: password);
-    final userUid = userCredential.user?.uid;
+      {required String email,
+      required String password,
+      required context}) async {
+    try {
+      UserCredential userCredential = await _firebaseAuth
+          .signInWithEmailAndPassword(email: email, password: password);
+      final userUid = userCredential.user?.uid;
 
-    final userRef = _firebaseFirestore.collection('users').doc(userUid);
-    final userData = await userRef.get();
-    if (!userData.get('isEnabled')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Your account has been disabled. Please contact an administrator.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-   
-      await _firebaseAuth.signOut();
-      return;
+      final userRef = _firebaseFirestore.collection('users').doc(userUid);
+      final userData = await userRef.get();
+      if (!userData.get('isEnabled')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Your account has been disabled. Please contact an administrator.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+
+        await _firebaseAuth.signOut();
+        return;
+      }
+
+      if (!await isEmailVerified()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Please verify your email address before proceeding.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+
+        await _firebaseAuth.signOut();
+        return;
+      }
+
+      _uid = userUid;
+      _isSignedIn = true;
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
     }
-
-    _uid = userUid;
-    _isSignedIn = true;
-    notifyListeners();
-  } on FirebaseAuthException catch (e) {
-    throw Exception(e.message);
   }
-}
 
 // check if user exists on database
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -216,21 +245,20 @@ class AuthProvider with ChangeNotifier {
           .then((DocumentSnapshot snapshot) {
         if (snapshot.exists) {
           _userModel = UserModel(
-            firstName: snapshot['firstName'],
-            middleName: snapshot['middleName'],
-            lastName: snapshot['lastName'],
-            suffix: snapshot['suffix'],
-            email: snapshot['email'],
-            role: snapshot['role'],
-            sex: snapshot['sex'],
-            address: snapshot['address'],
-            birthdate: snapshot['birthdate'],
-            createdAt: snapshot['createdAt'],
-            uid: snapshot['uid'],
-            profilePic: snapshot['profilePic'],
-            phoneNumber: snapshot['phoneNumber'],
-            isEnabled: true
-          );
+              firstName: snapshot['firstName'],
+              middleName: snapshot['middleName'],
+              lastName: snapshot['lastName'],
+              suffix: snapshot['suffix'],
+              email: snapshot['email'],
+              role: snapshot['role'],
+              sex: snapshot['sex'],
+              address: snapshot['address'],
+              birthdate: snapshot['birthdate'],
+              createdAt: snapshot['createdAt'],
+              uid: snapshot['uid'],
+              profilePic: snapshot['profilePic'],
+              phoneNumber: snapshot['phoneNumber'],
+              isEnabled: true);
           _uid = userModel.uid;
         } else {
           // Handle the case where the user data is null

@@ -1,12 +1,9 @@
-import 'package:bluejobs/navigation/employer_navigation.dart';
-import 'package:bluejobs/navigation/jobhunter_navigation.dart';
-import 'package:bluejobs/provider/auth_provider.dart';
+import 'package:bluejobs/screens_for_auth/signin.dart';
 import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class DoneCreatePage extends StatefulWidget {
   const DoneCreatePage({super.key});
@@ -29,11 +26,9 @@ class _DoneCreatePageState extends State<DoneCreatePage> {
 
   @override
   Widget build(BuildContext context) {
-    final ap = Provider.of<AuthProvider>(context, listen: false);
-    String role = ap.userModel.role;
     return ConfettiWidget(
         confettiController: _confettiKey,
-        blastDirectionality: BlastDirectionality.explosive, // Explosive blast
+        blastDirectionality: BlastDirectionality.explosive,
         colors: const [
           Colors.orange,
           Color.fromARGB(255, 7, 30, 47),
@@ -56,31 +51,32 @@ class _DoneCreatePageState extends State<DoneCreatePage> {
               const SizedBox(
                 height: 20,
               ),
+              Text("You are one step closer...",
+                  style: CustomTextStyle.titleText
+                      .copyWith(fontSize: responsiveSize(context, 0.05))),
+              const SizedBox(
+                height: 20,
+              ),
+              Text("Check your email to verify your account before logging in.",
+                  style: CustomTextStyle.titleText
+                      .copyWith(fontSize: responsiveSize(context, 0.05))),
+              const SizedBox(
+                height: 20,
+              ),
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: ListBody(
                   children: [
                     CustomButton(
                       onPressed: () {
-                        if (role == 'Employer') {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const EmployerNavigation(),
-                            ),
-                            (route) => false,
-                          );
-                        } else if (role == 'Job Hunter') {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const JobhunterNavigation(),
-                            ),
-                            (route) => false,
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInPage(),
+                          ),
+                        );
                       },
-                      buttonText: 'Next',
+                      buttonText: 'Proceed to Log In',
                     ),
                   ],
                 ),

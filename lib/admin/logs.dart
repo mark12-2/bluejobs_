@@ -1,5 +1,4 @@
 import 'package:bluejobs/admin/user_logs.dart';
-import 'package:bluejobs/default_screens/view_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bluejobs/styles/custom_theme.dart';

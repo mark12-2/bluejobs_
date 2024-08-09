@@ -120,13 +120,6 @@ class PostsProvider with ChangeNotifier {
     return posts.where('ownerId', isEqualTo: userId).snapshots();
   }
 
-  // fetching a specific post (job post) for viewing
-//   Stream<QuerySnapshot> getASpecificJobPostStream(String? postId) {
-//   final jobPostStream = FirebaseFirestore.instance
-//       .collection('Posts').where('postId', isEqualTo: postId).snapshots();
-
-//   return jobPostStream;
-// }
 
 // update post method
   Future<void> updatePost(Post post) async {

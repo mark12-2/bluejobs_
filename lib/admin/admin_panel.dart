@@ -22,7 +22,6 @@ class _AdminPanelState extends State<AdminPanel> {
   List<Map<String, dynamic>> _filteredUsers = [];
   List<Map<String, dynamic>> _allPosts = [];
   List<Map<String, dynamic>> _filteredPosts = [];
-  int _currentTab = 0;
   final PostsProvider postsProvider = PostsProvider();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -156,7 +155,6 @@ class _AdminPanelState extends State<AdminPanel> {
             ],
             onTap: (index) {
               setState(() {
-                _currentTab = index;
               });
             },
           ),
