@@ -292,15 +292,6 @@ class AuthProvider with ChangeNotifier {
     s.clear();
   }
 
-// fetching resume data
-  Stream<QuerySnapshot> getResumeData(String uid) {
-    return FirebaseFirestore.instance
-        .collection("users")
-        .doc(uid)
-        .collection("resume")
-        .snapshots();
-  }
-
   // use with caution
   // deleting user information (account) and its posts
   Future<void> deleteUserFromFirestore(String uid, String password) async {

@@ -20,7 +20,7 @@ void showLocationPickerModal(
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  "Location of Workplace",
+                  "Location of Job Hunter",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),

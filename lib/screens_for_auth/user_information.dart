@@ -3,6 +3,7 @@ import 'package:bluejobs/dropdowns/addresses.dart';
 import 'package:bluejobs/model/user_model.dart';
 import 'package:bluejobs/provider/auth_provider.dart';
 import 'package:bluejobs/screens_for_auth/confetti.dart';
+import 'package:bluejobs/screens_for_auth/skills.dart';
 import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/custom_theme.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
@@ -214,8 +215,7 @@ class _UserInformationState extends State<UserInformation> {
                         IntlPhoneField(
                           decoration: customInputDecoration('Phone Number'),
                           controller: _phoneController,
-                          initialCountryCode:
-                              'PH', 
+                          initialCountryCode: 'PH',
                           onChanged: (phone) {},
                         ),
 
@@ -495,13 +495,24 @@ class _UserInformationState extends State<UserInformation> {
       onSuccess: () {
         ap.saveUserDataToSP().then((value) {
           ap.setSignIn();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DoneCreatePage(),
-            ),
-            (route) => false,
-          );
+          String role = userModel.role;
+          if (role == 'Employer') {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DoneCreatePage(),
+              ),
+              (route) => false,
+            );
+          } else if (role == 'Job Hunter') {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ButtonSpecializationPage(),
+              ),
+              (route) => false,
+            );
+          }
         });
       },
     );

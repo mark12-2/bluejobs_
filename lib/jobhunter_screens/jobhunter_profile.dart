@@ -1,6 +1,6 @@
 import 'package:bluejobs/employer_screens/edit_jobpost.dart';
 import 'package:bluejobs/jobhunter_screens/edit_post.dart';
-import 'package:bluejobs/jobhunter_screens/resume_form.dart';
+import 'package:bluejobs/utils/resume_form.dart';
 import 'package:bluejobs/jobhunter_screens/saved_post.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
@@ -42,60 +42,60 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
       length: 4,
       child: Scaffold(
         appBar: AppBar(
-          actions: [
-            PopupMenuButton(
-              icon: const Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Icon(
-                  Icons.more_vert,
-                  size: 35,
-                ),
-              ),
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'editProfile',
-                  child: Text('Edit Profile'),
-                ),
-                const PopupMenuItem(
-                  value: 'signOut',
-                  child: Text('Sign Out'),
-                ),
-                const PopupMenuItem(
-                  value: 'savedPosts',
-                  child: Text('Saved Posts'),
-                ),
-              ],
-              onSelected: (value) {
-                if (value == 'editProfile') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditUserInformation(),
-                    ),
-                  );
-                } else if (value == 'signOut') {
-                  userLoggedIn.userSignOut().then(
-                        (value) => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignInPage(),
-                          ),
-                        ),
-                      );
-                }
-                if (value == 'savedPosts') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          SavedPostsPage(userId: userLoggedIn.uid),
-                    ),
-                  );
-                }
-              },
-            )
-          ],
-        ),
+            // actions: [
+            //   PopupMenuButton(
+            //     icon: const Padding(
+            //       padding: EdgeInsets.all(10.0),
+            //       child: Icon(
+            //         Icons.more_vert,
+            //         size: 35,
+            //       ),
+            //     ),
+            //     itemBuilder: (context) => [
+            //       const PopupMenuItem(
+            //         value: 'editProfile',
+            //         child: Text('Edit Profile'),
+            //       ),
+            //       const PopupMenuItem(
+            //         value: 'signOut',
+            //         child: Text('Sign Out'),
+            //       ),
+            //       const PopupMenuItem(
+            //         value: 'savedPosts',
+            //         child: Text('Saved Posts'),
+            //       ),
+            //     ],
+            //     onSelected: (value) {
+            //       if (value == 'editProfile') {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (context) => const EditUserInformation(),
+            //           ),
+            //         );
+            //       } else if (value == 'signOut') {
+            //         userLoggedIn.userSignOut().then(
+            //               (value) => Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (context) => const SignInPage(),
+            //                 ),
+            //               ),
+            //             );
+            //       }
+            //       if (value == 'savedPosts') {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (context) =>
+            //                 SavedPostsPage(userId: userLoggedIn.uid),
+            //           ),
+            //         );
+            //       }
+            //     },
+            //   )
+            // ],
+            ),
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -190,7 +190,7 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
           buildMyPostsTab(),
           buildResumeTab(),
           buildApplicationsTab(),
-          buildAboutTab(),
+          buildAboutTab(context),
         ],
       );
 
@@ -399,18 +399,18 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
       future: fetchResumeData(userLoggedIn.uid),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          Map<String, dynamic> resumeData =
-              snapshot.data as Map<String, dynamic>;
+          List<String> skills = snapshot.data ?? [];
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
-            child: Container(
+            child: SizedBox(
               height: MediaQuery.of(context).size.height - 100,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Bio Data',
-                      style: CustomTextStyle.typeRegularText
-                          .copyWith(fontSize: responsiveSize(context, 0.03))),
+                      style: CustomTextStyle.typeRegularText.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: responsiveSize(context, 0.03))),
                   const SizedBox(height: 15),
                   buildResumeItem(
                     'Name',
@@ -422,26 +422,18 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                       'Contacts', userLoggedIn.userModel.phoneNumber),
                   buildResumeItem('Email', userLoggedIn.userModel.email ?? ''),
                   buildResumeItem('Address', userLoggedIn.userModel.address),
-                  const SizedBox(height: 15),
-                  Text('Background Details',
-                      style: CustomTextStyle.typeRegularText
-                          .copyWith(fontSize: responsiveSize(context, 0.03))),
-                  const SizedBox(height: 15),
-                  buildResumeItem('Skills', resumeData['skills'] ?? ''),
-                  buildResumeItem('Experience', resumeData['experience'] ?? ''),
-                  buildResumeItem(
-                      'Expected Salary', resumeData['expectedSalary'] ?? ''),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ResumeForm(resumeData: resumeData),
-                          ),
-                        );
-                      },
-                      child: Text('Add or Edit Details'))
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 5.0),
+                    child: Text(
+                      'I am mostly good at!',
+                      style: CustomTextStyle.typeRegularText.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: responsiveSize(context, 0.03),
+                      ),
+                    ),
+                  ),
+                  buildSpecializationChips(skills),
                 ],
               ),
             ),
@@ -453,25 +445,38 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
     );
   }
 
-  Future<Map<String, dynamic>> fetchResumeData(String uid) async {
+  Widget buildSpecializationChips(List<String> skills) {
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
+      children: skills.map((specialization) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Chip(
+            backgroundColor: const Color.fromARGB(255, 243, 107, 4),
+            label: Text(
+              specialization,
+              style: CustomTextStyle.regularText.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<List<String>> fetchResumeData(String userId) async {
     try {
-      final userRef = FirebaseFirestore.instance.collection("users").doc(uid);
+      final firestore = FirebaseFirestore.instance;
+      final userRef = firestore.collection('users').doc(userId);
       final userDoc = await userRef.get();
-      if (userDoc.exists) {
-        final resumeRef = userRef.collection("resume").limit(1);
-        final resumeQuerySnapshot = await resumeRef.get();
-        if (resumeQuerySnapshot.docs.isNotEmpty) {
-          final resumeDoc = resumeQuerySnapshot.docs.first;
-          return resumeDoc.data();
-        } else {
-          return {};
-        }
-      } else {
-        return {};
-      }
+      final skillsList = List<String>.from(userDoc.get('skills'));
+
+      return skillsList ?? [];
     } catch (e) {
-      print('Error: $e');
-      rethrow;
+      print('Error fetching resume data: $e');
+      return [];
     }
   }
 
@@ -500,79 +505,117 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
     );
   }
 
-  Widget buildAboutTab() {
+  Widget buildAboutTab(BuildContext context) {
     final userLoggedIn =
         Provider.of<auth_provider.AuthProvider>(context, listen: false);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        height: MediaQuery.of(context).size.height - 200,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildAboutItem(Icons.badge, 'Role', userLoggedIn.userModel.role),
-            buildAboutItem(
-                Icons.transgender, 'Sex', userLoggedIn.userModel.sex),
-            buildAboutItem(
-                Icons.cake, 'Birthday', userLoggedIn.userModel.birthdate),
-            buildAboutItem(Icons.phone, 'Contact Number',
-                userLoggedIn.userModel.phoneNumber),
-            buildAboutItem(
-                Icons.email, 'Email', userLoggedIn.userModel.email ?? ''),
-            buildAboutItem(
-                Icons.location_on, 'Address', userLoggedIn.userModel.address),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditUserInformation(),
-                  ),
-                );
-              },
-              child: Row(
-                children: [
-                  Icon(Icons.edit),
-                  SizedBox(width: 10),
-                  Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.bookmark_added_outlined,
+                color: Color.fromARGB(255, 0, 0, 0)),
+            title: Text(
+              'Saved Posts',
+              style: CustomTextStyle.semiBoldText.copyWith(
+                fontSize: responsiveSize(context, 0.03),
               ),
-            )
-          ],
-        ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      SavedPostsPage(userId: userLoggedIn.uid),
+                ),
+              );
+            },
+            contentPadding: const EdgeInsets.all(10),
+          ),
+          ListTile(
+            leading:
+                const Icon(Icons.settings, color: Color.fromARGB(255, 0, 0, 0)),
+            title: Text(
+              'Settings',
+              style: CustomTextStyle.semiBoldText.copyWith(
+                fontSize: responsiveSize(context, 0.03),
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const EditUserInformation()),
+              );
+            },
+            contentPadding: const EdgeInsets.all(10),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout_rounded,
+                color: Color.fromARGB(255, 0, 0, 0)),
+            title: Text(
+              'Log Out',
+              style: CustomTextStyle.semiBoldText.copyWith(
+                fontSize: responsiveSize(context, 0.03),
+              ),
+            ),
+            onTap: () {
+              _showLogoutConfirmationDialog(context);
+            },
+            contentPadding: const EdgeInsets.all(10),
+          ),
+        ],
       ),
     );
   }
 
-  Widget buildAboutItem(IconData icon, String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: Row(
-        children: [
-          Icon(icon),
-          SizedBox(width: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    final userLoggedIn =
+        Provider.of<auth_provider.AuthProvider>(context, listen: false);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color.fromARGB(255, 217, 228, 237),
+          title: Text('Log out',
+              style: CustomTextStyle.semiBoldText
+                  .copyWith(fontSize: responsiveSize(context, 0.03))),
+          content: const Text(
+            'Are you sure you want to log out?',
+            style: CustomTextStyle.semiBoldText,
           ),
-          Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Hmm, no',
+                style: CustomTextStyle.semiBoldText,
+              ),
             ),
-          ),
-        ],
-      ),
+            TextButton(
+              onPressed: () {
+                userLoggedIn.userSignOut().then(
+                      (value) => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInPage(),
+                        ),
+                      ),
+                    );
+              },
+              child: Text(
+                'Yes, Im sure! ',
+                style:
+                    CustomTextStyle.semiBoldText.copyWith(color: Colors.orange),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

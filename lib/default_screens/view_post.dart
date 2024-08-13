@@ -114,7 +114,7 @@ class _ViewPostPageState extends State<ViewPostPage> {
                                   "$name",
                                   style: CustomTextStyle.semiBoldText.copyWith(
                                     color: const Color.fromARGB(255, 0, 0, 0),
-                                    fontSize: responsiveSize(context, 0.05),
+                                    fontSize: responsiveSize(context, 0.04),
                                   ),
                                 ),
                                 const SizedBox(width: 5),

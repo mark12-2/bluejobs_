@@ -97,7 +97,7 @@ class _EditPostState extends State<EditPost> {
                       TextFormField(
                         initialValue: _description,
                         decoration: customInputDecoration('Description'),
-                        maxLines: 20,
+                        maxLines: 20, 
                         minLines: 1,
                         keyboardType: TextInputType.multiline,
                         onSaved: (value) => _description = value,

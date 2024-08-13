@@ -368,10 +368,6 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
             Row(
               children: [
                 ElevatedButton(
-                  onPressed: () => addJobPost(context),
-                  child: const Text('Post'),
-                ),
-                ElevatedButton(
                   onPressed: () {
                     _titleController.clear();
                     _descriptionController.clear();
@@ -382,8 +378,16 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                         MaterialPageRoute(
                             builder: (context) => const EmployerNavigation()));
                   },
-                  child: const Text('Cancel'),
-                )
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () => addJobPost(context),
+                  child: const Text('Post'),
+                ),
               ],
             )
           ],

@@ -41,47 +41,47 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          actions: [
-            PopupMenuButton(
-              icon: const Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Icon(
-                  Icons.more_vert,
-                  size: 35,
-                ),
-              ),
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'editProfile',
-                  child: Text('Edit Profile'),
-                ),
-                const PopupMenuItem(
-                  value: 'signOut',
-                  child: Text('Sign Out'),
-                ),
-              ],
-              onSelected: (value) {
-                if (value == 'editProfile') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditUserInformation(),
-                    ),
-                  );
-                } else if (value == 'signOut') {
-                  userLoggedIn.userSignOut().then(
-                        (value) => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignInPage(),
-                          ),
-                        ),
-                      );
-                }
-              },
-            )
-          ],
-        ),
+            // actions: [
+            //   PopupMenuButton(
+            //     icon: const Padding(
+            //       padding: EdgeInsets.all(10.0),
+            //       child: Icon(
+            //         Icons.more_vert,
+            //         size: 35,
+            //       ),
+            //     ),
+            //     itemBuilder: (context) => [
+            //       const PopupMenuItem(
+            //         value: 'editProfile',
+            //         child: Text('Edit Profile'),
+            //       ),
+            //       const PopupMenuItem(
+            //         value: 'signOut',
+            //         child: Text('Sign Out'),
+            //       ),
+            //     ],
+            //     onSelected: (value) {
+            //       if (value == 'editProfile') {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (context) => const EditUserInformation(),
+            //           ),
+            //         );
+            //       } else if (value == 'signOut') {
+            //         userLoggedIn.userSignOut().then(
+            //               (value) => Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (context) => const SignInPage(),
+            //                 ),
+            //               ),
+            //             );
+            //       }
+            //     },
+            //   )
+            // ],
+            ),
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -171,7 +171,7 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
         children: [
           buildMyPostsTab(),
           buildApplicantsTab(),
-          buildAboutTab(),
+          buildAboutTab(context),
         ],
       );
 
@@ -207,12 +207,18 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
 
                 String name = post['name'];
                 String role = post['role'];
+
                 String profilePic = post['profilePic'];
-                String title = post['title'];
+                String title = post['title'] ?? ''; // for job post
                 String description = post['description'];
                 String type = post['type'];
-                String location = post['location'];
-                String rate = post['rate'];
+                String location = post['location'] ?? ''; // for job post
+                String rate = post['rate'] ?? ''; // for job post
+                String numberOfWorkers = post['numberOfWorkers'] ?? '';
+                String startDate = post['startDate'] ?? '';
+                String endDate = post['endDate'] ?? '';
+                String workingHours =
+                    post['workingHours'] ?? ''; // for job post
 
                 return Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -310,6 +316,26 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
                                     "Rate: $rate",
                                     style: CustomTextStyle.regularText,
                                   ),
+                                  Text(
+                                    "Workers Needed: $numberOfWorkers",
+                                    style: CustomTextStyle.regularText,
+                                  ),
+                                  Text(
+                                    "Rate: $rate",
+                                    style: CustomTextStyle.regularText,
+                                  ),
+                                  Text(
+                                    "Working Hours: $workingHours",
+                                    style: CustomTextStyle.regularText,
+                                  ),
+                                  Text(
+                                    "Start Date: $startDate",
+                                    style: CustomTextStyle.regularText,
+                                  ),
+                                  Text(
+                                    "End Date: $endDate",
+                                    style: CustomTextStyle.regularText,
+                                  ),
                                   const SizedBox(height: 15),
                                   Row(children: [
                                     IconButton(
@@ -377,104 +403,97 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
         });
   }
 
-  Widget buildAboutTab() {
+  Widget buildAboutTab(BuildContext context) {
     final userLoggedIn =
         Provider.of<auth_provider.AuthProvider>(context, listen: false);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        height: MediaQuery.of(context).size.height - 200,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildAboutItem(Icons.badge, 'Role', userLoggedIn.userModel.role),
-            buildAboutItem(
-                Icons.transgender, 'Sex', userLoggedIn.userModel.sex),
-            buildAboutItem(
-                Icons.cake, 'Birthday', userLoggedIn.userModel.birthdate),
-            buildAboutItem(Icons.phone, 'Contact Number',
-                userLoggedIn.userModel.phoneNumber),
-            buildAboutItem(
-                Icons.email, 'Email', userLoggedIn.userModel.email ?? ''),
-            buildAboutItem(
-                Icons.location_on, 'Address', userLoggedIn.userModel.address),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditUserInformation(),
-                  ),
-                );
-              },
-              child: Row(
-                children: [
-                  Icon(Icons.edit),
-                  SizedBox(width: 10),
-                  Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget buildAboutItem(IconData icon, String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: Row(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(icon),
-          SizedBox(width: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          ListTile(
+            leading:
+                const Icon(Icons.settings, color: Color.fromARGB(255, 0, 0, 0)),
+            title: Text(
+              'Settings',
+              style: CustomTextStyle.semiBoldText.copyWith(
+                fontSize: responsiveSize(context, 0.03),
+              ),
             ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const EditUserInformation()),
+              );
+            },
+            contentPadding: const EdgeInsets.all(10),
           ),
-          Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
+          ListTile(
+            leading: const Icon(Icons.logout_rounded,
+                color: Color.fromARGB(255, 0, 0, 0)),
+            title: Text(
+              'Log Out',
+              style: CustomTextStyle.semiBoldText.copyWith(
+                fontSize: responsiveSize(context, 0.03),
+              ),
             ),
+            onTap: () {
+              _showLogoutConfirmationDialog(context);
+            },
+            contentPadding: const EdgeInsets.all(10),
           ),
         ],
       ),
     );
   }
 
-  Widget buildResumeItem(String title, String content) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '$title: ',
-              style: CustomTextStyle.regularText.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: responsiveSize(context, 0.03),
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    final userLoggedIn =
+        Provider.of<auth_provider.AuthProvider>(context, listen: false);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color.fromARGB(255, 196, 211, 224),
+          title: Text('Log out',
+              style: CustomTextStyle.semiBoldText
+                  .copyWith(fontSize: responsiveSize(context, 0.03))),
+          content: const Text(
+            'Are you sure you want to log out?',
+            style: CustomTextStyle.semiBoldText,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Hmm, no',
+                style: CustomTextStyle.semiBoldText,
               ),
             ),
-            TextSpan(
-              text: content,
-              style: CustomTextStyle.regularText.copyWith(
-                fontSize: responsiveSize(context, 0.03),
+            TextButton(
+              onPressed: () {
+                userLoggedIn.userSignOut().then(
+                      (value) => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInPage(),
+                        ),
+                      ),
+                    );
+              },
+              child: Text(
+                'Yes, Im sure! ',
+                style:
+                    CustomTextStyle.semiBoldText.copyWith(color: Colors.orange),
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 

@@ -1,7 +1,7 @@
 import 'package:bluejobs/chats/messaging_roompage.dart';
-import 'package:bluejobs/employer_screens/edit_jobpost.dart';
-import 'package:bluejobs/jobhunter_screens/edit_post.dart';
+import 'package:bluejobs/default_screens/comment.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
+import 'package:bluejobs/provider/notifications/notifications_provider.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
@@ -23,6 +23,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final double coverHeight = 200;
   final double profileHeight = 100;
+
+  final _commentTextController = TextEditingController();
   Map<String, dynamic>? userData;
 
   @override
@@ -170,7 +172,19 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
   Widget buildPostsTab() {
+    bool _isApplied = false;
+    bool _isSaved = false;
+    final PostsProvider postDetails = Provider.of<PostsProvider>(context);
+    final FirebaseAuth auth = FirebaseAuth.instance;
     final PostsProvider postsProvider = PostsProvider();
+
+    void showCommentDialog(String postId, BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (dialogContext) => CommentScreen(postId: postId),
+      );
+    }
+
     return StreamBuilder<QuerySnapshot>(
         stream: postsProvider.getSpecificPostsStream(widget.userId),
         builder: (context, snapshot) {
@@ -198,177 +212,542 @@ class _ProfilePageState extends State<ProfilePage> {
                 final post = posts[index];
 
                 String name = post['name'];
+                String userId = post['ownerId'];
                 String role = post['role'];
-                String profilePic = post['profilePic'];
-                String title = post['title'];
+                String profilePic = post['profilePic'] ?? '';
+                String title = post['title'] ?? ''; // for job post
                 String description = post['description'];
                 String type = post['type'];
-                String location = post['location'];
-                String rate = post['rate'] ?? '';
+                String location = post['location'] ?? ''; // for job post
+                String rate = post['rate'] ?? ''; // for job post
+                String numberOfWorkers = post['numberOfWorkers'] ?? '';
+                String startDate = post['startDate'] ?? '';
+                String endDate = post['endDate'] ?? '';
+                String workingHours =
+                    post['workingHours'] ?? ''; // for job post
 
                 return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        elevation: 4.0,
-                        margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
-                        child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    elevation: 4.0,
+                    margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundImage: NetworkImage(profilePic),
+                                radius: 35.0,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundImage:
-                                            NetworkImage(profilePic),
-                                        radius: 35.0,
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            name,
-                                            style: CustomTextStyle.semiBoldText
-                                                .copyWith(
-                                              color: const Color.fromARGB(
-                                                  255, 0, 0, 0),
-                                              fontSize:
-                                                  responsiveSize(context, 0.05),
-                                            ),
-                                          ),
-                                          // Padding(
-                                          //   padding: const EdgeInsets.only(
-                                          //       right: 55.0),
-                                          //   child: Text(
-                                          //     role,
-                                          //     style: CustomTextStyle
-                                          //         .roleRegularText,
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 15),
-                                  role == 'Employer'
-                                      ? Text(
-                                          title,
-                                          style: CustomTextStyle.semiBoldText,
-                                        )
-                                      : Container(),
-                                  const SizedBox(height: 15),
                                   Text(
-                                    description,
-                                    style: CustomTextStyle.regularText,
+                                    name,
+                                    style:
+                                        CustomTextStyle.semiBoldText.copyWith(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: responsiveSize(context, 0.04),
+                                    ),
                                   ),
-                                  const SizedBox(height: 20),
-                                  role == 'Employer'
-                                      ? Row(
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () async {
-                                                final locations =
-                                                    await locationFromAddress(
-                                                        location);
-                                                final lat =
-                                                    locations[0].latitude;
-                                                final lon =
-                                                    locations[0].longitude;
-                                                showLocationPickerModal(
-                                                    context,
-                                                    TextEditingController(
-                                                        text: '$lat, $lon'));
-                                              },
-                                              child: Text(location,
-                                                  style: const TextStyle(
-                                                      color: Colors.blue)),
-                                            ),
-                                          ],
-                                        )
-                                      : Container(),
-                                  Text(
-                                    "Type of Job: $type",
-                                    style: CustomTextStyle.typeRegularText,
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 55.0),
+                                    child: Text(
+                                      role,
+                                      style: CustomTextStyle.roleRegularText,
+                                    ),
                                   ),
-                                  role == 'Employer'
-                                      ? Text(
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          role == 'Employer'
+                              ? Text(
+                                  title,
+                                  style: CustomTextStyle.semiBoldText,
+                                )
+                              : Container(),
+                          const SizedBox(height: 15),
+                          Text(
+                            description,
+                            style: CustomTextStyle.regularText,
+                          ),
+                          const SizedBox(height: 20),
+                          role == 'Employer'
+                              ? Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final locations =
+                                            await locationFromAddress(location);
+                                        final lat = locations[0].latitude;
+                                        final lon = locations[0].longitude;
+                                        showLocationPickerModal(
+                                            context,
+                                            TextEditingController(
+                                                text: '$lat, $lon'));
+                                      },
+                                      child: Text("Location: $location",
+                                          style: const TextStyle(
+                                              color: Colors.blue)),
+                                    ),
+                                  ],
+                                )
+                              : Container(),
+                          Text(
+                            "Type of Job: $type",
+                            style: CustomTextStyle.typeRegularText,
+                          ),
+                          role == 'Employer'
+                              ? Text(
+                                  "Rate: $rate",
+                                  style: CustomTextStyle.regularText,
+                                )
+                              : Container(),
+
+                          role == 'Employer'
+                              ? Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Workers Needed: $numberOfWorkers",
+                                          style: CustomTextStyle.regularText,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
                                           "Rate: $rate",
                                           style: CustomTextStyle.regularText,
-                                        )
-                                      : Container(),
-                                  const SizedBox(height: 15),
-                                  Row(children: [
-                                    IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        onPressed: () {
-                                          if (role == 'Employer') {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      JobEditPost(
-                                                          postId: post.id)),
-                                            );
-                                          } else if (role == 'Job Hunter') {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      EditPost(
-                                                          postId: post.id)),
-                                            );
-                                          }
-                                        }),
-                                    IconButton(
-                                        icon: const Icon(Icons.delete),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                    'Confirm Deletion'),
-                                                content: const Text(
-                                                    'Are you sure you want to delete this post? This action cannot be undone.'),
-                                                actions: <Widget>[
-                                                  TextButton(
-                                                    child: const Text('Cancel'),
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                  TextButton(
-                                                    child: const Text('Delete'),
-                                                    onPressed: () async {
-                                                      final postsProvider =
-                                                          Provider.of<
-                                                                  PostsProvider>(
-                                                              context,
-                                                              listen: false);
-                                                      await postsProvider
-                                                          .deletePost(post.id);
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Working Hours: $workingHours",
+                                          style: CustomTextStyle.regularText,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Start Date: $startDate",
+                                          style: CustomTextStyle.regularText,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "End Date: $endDate",
+                                          style: CustomTextStyle.regularText,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                              : Container(),
+                          const SizedBox(height: 20),
+                          // comment section and like
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                role == 'Job Hunter'
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          InkWell(
+                                            onTap: () async {
+                                              final postId = post.id;
+                                              final userId =
+                                                  auth.currentUser!.uid;
+
+                                              final postDoc =
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection('Posts')
+                                                      .doc(postId)
+                                                      .get();
+
+                                              if (postDoc.exists) {
+                                                final data = postDoc.data()
+                                                    as Map<String, dynamic>;
+
+                                                if (data.containsKey('likes')) {
+                                                  final likes = (data['likes']
+                                                          as List<dynamic>)
+                                                      .map((e) => e as String)
+                                                      .toList();
+
+                                                  if (likes.contains(userId)) {
+                                                    likes.remove(userId);
+                                                  } else {
+                                                    likes.add(userId);
+                                                  }
+
+                                                  await postDoc.reference
+                                                      .update({'likes': likes});
+                                                } else {
+                                                  await postDoc.reference
+                                                      .update({
+                                                    'likes': [userId]
+                                                  });
+                                                }
+                                              }
                                             },
-                                          );
-                                        })
-                                  ])
-                                ]))));
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.thumb_up_alt_rounded,
+                                                  color: post.data() != null &&
+                                                          (post.data() as Map<
+                                                                  String,
+                                                                  dynamic>)
+                                                              .containsKey(
+                                                                  'likes') &&
+                                                          ((post.data() as Map<
+                                                                      String,
+                                                                      dynamic>)['likes']
+                                                                  as List<
+                                                                      dynamic>)
+                                                              .contains(
+                                                                  auth.currentUser!.uid)
+                                                      ? Colors.blue
+                                                      : Colors.grey,
+                                                ),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  'React (${(post.data() as Map<String, dynamic>)['likes']?.length ?? 0})',
+                                                  style: CustomTextStyle
+                                                      .regularText,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 25),
+                                          InkWell(
+                                            onTap: () {
+                                              showCommentDialog(
+                                                  post.id, context);
+                                            },
+                                            child: const Row(
+                                              children: [
+                                                Icon(Icons.comment),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  'Comments',
+                                                  style: CustomTextStyle
+                                                      .regularText,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 50,
+                                          )
+                                        ],
+                                      )
+                                    : Container(),
+                                const SizedBox(width: 5),
+                                userId == auth.currentUser!.uid
+                                    ? Container()
+                                    : role == 'Employer'
+                                        ? Expanded(
+                                            child: FutureBuilder<bool>(
+                                              future: _checkApplicationStatus(
+                                                  post.id,
+                                                  auth.currentUser!.uid),
+                                              builder: (context, snapshot) {
+                                                bool isApplied =
+                                                    snapshot.data ?? false;
+                                                return FutureBuilder<bool>(
+                                                    future: _isPostUnavailable(
+                                                        post.id),
+                                                    builder: (context,
+                                                        postSnapshot) {
+                                                      bool isApplicationFull =
+                                                          postSnapshot.data ??
+                                                              false;
+                                                      return GestureDetector(
+                                                        onTap: isApplied ||
+                                                                isApplicationFull
+                                                            ? null
+                                                            : () async {
+                                                                final notificationProvider =
+                                                                    Provider.of<
+                                                                            NotificationProvider>(
+                                                                        context,
+                                                                        listen:
+                                                                            false);
+                                                                String
+                                                                    receiverId =
+                                                                    userId;
+                                                                String
+                                                                    applicantName =
+                                                                    auth.currentUser!
+                                                                            .displayName ??
+                                                                        'Unknown';
+                                                                String
+                                                                    applicantId =
+                                                                    auth.currentUser!
+                                                                        .uid;
+
+                                                                await notificationProvider
+                                                                    .someNotification(
+                                                                  receiverId:
+                                                                      receiverId,
+                                                                  senderId: auth
+                                                                      .currentUser!
+                                                                      .uid,
+                                                                  senderName:
+                                                                      applicantName,
+                                                                  title:
+                                                                      'New Application',
+                                                                  notif:
+                                                                      ', applied to your job entitled "$title"',
+                                                                );
+                                                                await Provider.of<
+                                                                            PostsProvider>(
+                                                                        context,
+                                                                        listen:
+                                                                            false)
+                                                                    .applyJob(
+                                                                  post.id,
+                                                                  title,
+                                                                  description,
+                                                                  userId,
+                                                                  name,
+                                                                );
+
+                                                                await Provider.of<
+                                                                            PostsProvider>(
+                                                                        context,
+                                                                        listen:
+                                                                            false)
+                                                                    .addApplicant(
+                                                                        post.id,
+                                                                        applicantId,
+                                                                        applicantName);
+
+                                                                ScaffoldMessenger.of(
+                                                                        context)
+                                                                    .showSnackBar(
+                                                                  const SnackBar(
+                                                                      content: Text(
+                                                                          'Successfully applied')),
+                                                                );
+
+                                                                setState(() {
+                                                                  _isApplied =
+                                                                      true;
+                                                                });
+                                                              },
+                                                        child: Container(
+                                                          height: 53,
+                                                          width: 165,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            border: Border.all(
+                                                              color: isApplied ||
+                                                                      isApplicationFull
+                                                                  ? Colors.grey
+                                                                  : const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      7,
+                                                                      30,
+                                                                      47),
+                                                              width: 2,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        5),
+                                                            color: Colors.white,
+                                                          ),
+                                                          child: Center(
+                                                            child: Text(
+                                                              isApplicationFull
+                                                                  ? 'Unavailable'
+                                                                  : postDetails
+                                                                          .isJobPostAvailable
+                                                                      ? (isApplied
+                                                                          ? 'Applied'
+                                                                          : 'Apply Job')
+                                                                      : 'Apply Job',
+                                                              style:
+                                                                  CustomTextStyle
+                                                                      .regularText
+                                                                      .copyWith(
+                                                                color: isApplied ||
+                                                                        isApplicationFull
+                                                                    ? Colors
+                                                                        .grey
+                                                                    : const Color
+                                                                        .fromARGB(
+                                                                        255,
+                                                                        0,
+                                                                        0,
+                                                                        0),
+                                                                fontSize:
+                                                                    responsiveSize(
+                                                                        context,
+                                                                        0.03),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+                                              },
+                                            ),
+                                          )
+                                        : Container(),
+                                const SizedBox(width: 10),
+                                userId == auth.currentUser!.uid
+                                    ? Container()
+                                    : role == 'Employer'
+                                        ? Expanded(
+                                            child: FutureBuilder<bool>(
+                                              future: _isPostAlreadySaved(
+                                                  post.id,
+                                                  auth.currentUser!.uid),
+                                              builder: (context, snapshot) {
+                                                bool isSaved =
+                                                    snapshot.data ?? false;
+                                                return GestureDetector(
+                                                  onTap: isSaved
+                                                      ? null
+                                                      : () async {
+                                                          final isSaved =
+                                                              await postDetails
+                                                                  .isPostSaved(
+                                                                      post.id,
+                                                                      auth.currentUser!
+                                                                          .uid);
+                                                          if (!isSaved) {
+                                                            await postDetails
+                                                                .savePost(
+                                                                    post.id,
+                                                                    auth.currentUser!
+                                                                        .uid);
+                                                            setState(() {
+                                                              _isSaved = true;
+                                                            });
+                                                          }
+                                                        },
+                                                  child: Container(
+                                                    height: 53,
+                                                    width: 165,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: isSaved
+                                                            ? Colors.grey
+                                                            : Colors.orange,
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5),
+                                                      color: Colors.white,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        isSaved
+                                                            ? 'Saved'
+                                                            : 'Save for Later',
+                                                        style: CustomTextStyle
+                                                            .regularText
+                                                            .copyWith(
+                                                          color: isSaved
+                                                              ? Colors.grey
+                                                              : const Color
+                                                                  .fromARGB(
+                                                                  255, 0, 0, 0),
+                                                          fontSize:
+                                                              responsiveSize(
+                                                                  context,
+                                                                  0.03),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          )
+                                        : Container(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
               });
         });
+  }
+
+  // adding a comment
+  void addComment(BuildContext context, String postId) async {
+    if (_commentTextController.text.isNotEmpty) {
+      String comment = _commentTextController.text;
+
+      try {
+        await Provider.of<PostsProvider>(context, listen: false)
+            .addComment(comment, postId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Comment added successfully')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add comment: $e')),
+        );
+      }
+    }
+  }
+
+  Future<bool> _checkApplicationStatus(String postId, String userId) async {
+    final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+    final postDoc = await postRef.get();
+    final applicants = postDoc.get('applicants') as List<dynamic>?;
+    return applicants != null && applicants.contains(userId);
+  }
+
+  Future<bool> _isPostAlreadySaved(String postId, String userId) async {
+    final savedPostsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('saved')
+        .doc(postId);
+    final savedPostsDoc = await savedPostsRef.get();
+    return savedPostsDoc.exists;
+  }
+
+  Future<bool> _isPostUnavailable(String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+    final postDoc = await postRef.get();
+    final isApplicationFull = postDoc.get('isApplicationFull') as bool?;
+    return isApplicationFull ?? false;
   }
 
   Widget buildAboutTab() {

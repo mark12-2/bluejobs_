@@ -1,4 +1,4 @@
-import 'package:bluejobs/jobhunter_screens/resume_view.dart';
+import 'package:bluejobs/jobhunter_screens/details_view.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

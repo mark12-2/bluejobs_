@@ -73,7 +73,6 @@ class _PostPageState extends State<PostPage> {
               ),
             ),
             const SizedBox(height: 30),
-
             TextField(
               controller: _descriptionController,
               focusNode: _descriptionFocusNode,
@@ -90,9 +89,7 @@ class _PostPageState extends State<PostPage> {
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),
-
             const SizedBox(height: 20),
-
             TextField(
               controller: _typeController,
               focusNode: _typeFocusNode,
@@ -109,15 +106,9 @@ class _PostPageState extends State<PostPage> {
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),
-
             const SizedBox(height: 40),
-
             Row(
               children: [
-                ElevatedButton(
-                  onPressed: () => createPost(context),
-                  child: const Text('Post'),
-                ),
                 ElevatedButton(
                   onPressed: () {
                     _descriptionController.clear();
@@ -128,8 +119,16 @@ class _PostPageState extends State<PostPage> {
                         MaterialPageRoute(
                             builder: (context) => const JobhunterNavigation()));
                   },
-                  child: const Text('Cancel'),
-                )
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () => createPost(context),
+                  child: const Text('Post'),
+                ),
               ],
             )
           ],
