@@ -784,12 +784,44 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
                   Text(
-                    'Rating: $rating/5',
+                    'Your Rating: $rating',
                     style: TextStyle(fontSize: 16),
                   ),
-                  Text(
-                    'Number of ratings: $ratingCount',
-                    style: TextStyle(fontSize: 16),
+                  // Text(
+                  //   'Number of ratings: $ratingCount',
+                  //   style: TextStyle(fontSize: 16),
+                  // ),
+                  StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(ratedUserId)
+                        .collection('ratings')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: 5,
+                          itemBuilder: (context, index) {
+                            final rating = 5 - index;
+                            final ratingCount =
+                                snapshot.data!.docs.where((doc) {
+                              final ratingValue = doc.data()['stars'];
+                              return ratingValue.toInt() == rating;
+                            }).length;
+
+                            return ListTile(
+                              title: Text(
+                                '$rating stars ($ratingCount)',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
                   ),
                   const SizedBox(height: 20),
                   buildResumeItem('Name', userData['firstName'] ?? ''),
@@ -831,6 +863,11 @@ class _ProfilePageState extends State<ProfilePage> {
             'rating': rating,
           });
         }
+
+        await ratedUserRef.collection('ratings').add({
+          'stars': rating,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       }
     } catch (e) {
       print('Error updating rating: $e');
