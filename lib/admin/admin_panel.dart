@@ -154,8 +154,7 @@ class _AdminPanelState extends State<AdminPanel> {
               Tab(text: 'Posts'),
             ],
             onTap: (index) {
-              setState(() {
-              });
+              setState(() {});
             },
           ),
         ),

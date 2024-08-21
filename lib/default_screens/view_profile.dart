@@ -8,6 +8,7 @@ import 'package:bluejobs/styles/textstyle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final _commentTextController = TextEditingController();
   Map<String, dynamic>? userData;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -167,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildTabBarView() => TabBarView(
         children: [
           buildPostsTab(),
-          buildAboutTab(),
+          buildAboutTab(userData?['uid'] ?? ''),
         ],
       );
 
@@ -750,22 +752,89 @@ class _ProfilePageState extends State<ProfilePage> {
     return isApplicationFull ?? false;
   }
 
-  Widget buildAboutTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        height: MediaQuery.of(context).size.height - 200,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildResumeItem('Name', userData?['firstName'] ?? ''),
-            buildResumeItem('Contact Number', userData?['phoneNumber'] ?? ''),
-            buildResumeItem('Sex', userData?['sex'] ?? ''),
-            buildResumeItem('Address', userData?['address'] ?? ''),
-          ],
-        ),
-      ),
+  Widget buildAboutTab(String ratedUserId) {
+    return FutureBuilder(
+      future:
+          FirebaseFirestore.instance.collection('users').doc(ratedUserId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final userData = snapshot.data!.data() as Map<String, dynamic>;
+          final rating = userData['rating'] ?? 0;
+          final ratingCount = userData['ratingCount'] ?? 0;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(10.0),
+            child: Container(
+              height: MediaQuery.of(context).size.height - 200,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RatingBar(
+                    initialRating: rating.toDouble(),
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    ratingWidget: RatingWidget(
+                      full: Icon(Icons.star, color: Colors.orange),
+                      half: Icon(Icons.star_half, color: Colors.orange),
+                      empty: Icon(Icons.star_border, color: Colors.orange),
+                    ),
+                    onRatingUpdate: (rating) async {
+                      await updateRating(rating, ratedUserId);
+                    },
+                  ),
+                  Text(
+                    'Rating: $rating/5',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    'Number of ratings: $ratingCount',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  buildResumeItem('Name', userData['firstName'] ?? ''),
+                  buildResumeItem(
+                      'Contact Number', userData['phoneNumber'] ?? ''),
+                  buildResumeItem('Sex', userData['sex'] ?? ''),
+                  buildResumeItem('Address', userData['address'] ?? ''),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
     );
+  }
+
+  Future<void> updateRating(double rating, String ratedUserId) async {
+    try {
+      final ratedUserRef =
+          FirebaseFirestore.instance.collection('users').doc(ratedUserId);
+      final ratedUserData =
+          (await ratedUserRef.get()).data() as Map<String, dynamic>?;
+      if (ratedUserData != null) {
+        if (ratedUserData.containsKey('rating')) {
+          final totalRating = ratedUserData['totalRating'] ?? 0;
+          final ratingCount = ratedUserData['ratingCount'] ?? 0;
+
+          await ratedUserRef.update({
+            'totalRating': totalRating + rating - ratedUserData['rating'],
+            'ratingCount': ratingCount + 1,
+            'rating': rating,
+          });
+        } else {
+          await ratedUserRef.update({
+            'totalRating': rating,
+            'ratingCount': 1,
+            'rating': rating,
+          });
+        }
+      }
+    } catch (e) {
+      print('Error updating rating: $e');
+    }
   }
 
   Widget buildResumeItem(String title, String content) {

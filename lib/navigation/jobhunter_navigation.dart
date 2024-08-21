@@ -1,7 +1,7 @@
 import 'package:bluejobs/chats/messaging_page.dart';
-import 'package:bluejobs/default_screens/home.dart';
 import 'package:bluejobs/default_screens/search.dart';
 import 'package:bluejobs/jobhunter_screens/create_post.dart';
+import 'package:bluejobs/jobhunter_screens/jobhunter_home.dart';
 import 'package:bluejobs/jobhunter_screens/jobhunter_profile.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,7 @@ class JobhunterNavigation extends StatefulWidget {
 class _JobhunterNavigationState extends State<JobhunterNavigation> {
   int _selectedIndex = 0;
   List<Widget> defaultScreens = <Widget>[
-    const HomePage(),
+    const JobHunterHomePage(),
     const SearchPage(),
     const PostPage(),
     const MessagingPage(),

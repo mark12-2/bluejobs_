@@ -1,7 +1,7 @@
 import 'package:bluejobs/chats/messaging_page.dart';
-import 'package:bluejobs/default_screens/home.dart';
 import 'package:bluejobs/default_screens/search.dart';
 import 'package:bluejobs/employer_screens/create_jobpost.dart';
+import 'package:bluejobs/employer_screens/employer_home.dart';
 import 'package:bluejobs/employer_screens/employer_profile.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,7 @@ class EmployerNavigation extends StatefulWidget {
 class _EmployerNavigationState extends State<EmployerNavigation> {
   int _selectedIndex = 0;
   List<Widget> defaultScreens = <Widget>[
-    const HomePage(),
+    const EmployerHomePage(),
     const SearchPage(),
     const CreateJobPostPage(),
     const MessagingPage(),
