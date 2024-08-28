@@ -64,10 +64,7 @@ class PostsProvider with ChangeNotifier {
         "description": post.description,
         "type": post.type,
         "location": post.location ?? '',
-        "rate": post.rate ?? '',
-        "numberOfWorkers": post.numberOfWorkers ?? '',
         "startDate": post.startDate ?? '',
-        "endDate": post.endDate ?? '',
         "workingHours": post.workingHours ?? '',
         "timestamp": Timestamp.now(),
         "likes": [],
@@ -120,7 +117,6 @@ class PostsProvider with ChangeNotifier {
     return posts.where('ownerId', isEqualTo: userId).snapshots();
   }
 
-
 // update post method
   Future<void> updatePost(Post post) async {
     UserModel? currentUserDetails = await fetchCurrentUserDetails();
@@ -134,15 +130,12 @@ class PostsProvider with ChangeNotifier {
       "description": post.description,
       "type": post.type,
       "location": post.location ?? '',
-      "rate": post.rate ?? '',
       "name":
           "${currentUserDetails.firstName} ${currentUserDetails.middleName} ${currentUserDetails.lastName} ${currentUserDetails.suffix}",
       "email": currentUserDetails.email,
       "role": currentUserDetails.role,
       "profilePic": currentUserDetails.profilePic,
-      "numberOfWorkers": post.numberOfWorkers ?? '',
       "startDate": post.startDate ?? '',
-      "endDate": post.endDate ?? '',
       "workingHours": post.workingHours ?? '',
       "timestamp": Timestamp.now(),
     });

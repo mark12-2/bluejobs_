@@ -126,10 +126,8 @@ class _JobEditPostState extends State<JobEditPost> {
           _descriptionController.text = post.description ?? '';
           _typeController.text = post.type ?? '';
           _locationController.text = post.location ?? '';
-          _rateController.text = post.rate ?? '';
-          _numberOfWorkersController.text = post.numberOfWorkers ?? '';
+
           _startDateController.text = post.startDate ?? '';
-          _endDateController.text = post.endDate ?? '';
           _workingHoursController.text = post.workingHours ?? '';
           _isLoading = false;
         });
@@ -499,10 +497,7 @@ class _JobEditPostState extends State<JobEditPost> {
           description: _descriptionController.text,
           type: _typeController.text,
           location: _locationController.text,
-          rate: _rateController.text,
-          numberOfWorkers: _numberOfWorkersController.text,
           startDate: _startDateController.text,
-          endDate: _endDateController.text,
           workingHours: _workingHoursController.text,
         );
 

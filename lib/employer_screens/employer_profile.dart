@@ -1,5 +1,6 @@
 import 'package:bluejobs/employer_screens/applicants.dart';
 import 'package:bluejobs/employer_screens/edit_jobpost.dart';
+import 'package:bluejobs/employer_screens/verification.dart';
 import 'package:bluejobs/jobhunter_screens/edit_post.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
@@ -426,6 +427,24 @@ class _EmployerProfilePageState extends State<EmployerProfilePage> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const EditUserInformation()),
+              );
+            },
+            contentPadding: const EdgeInsets.all(10),
+          ),
+          ListTile(
+            leading: const Icon(Icons.check_circle_outline,
+                color: Color.fromARGB(255, 0, 0, 0)),
+            title: Text(
+              'Verify Account',
+              style: CustomTextStyle.semiBoldText.copyWith(
+                fontSize: responsiveSize(context, 0.03),
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const VerificationForm()),
               );
             },
             contentPadding: const EdgeInsets.all(10),

@@ -1,11 +1,12 @@
 import 'package:bluejobs/employer_screens/edit_jobpost.dart';
 import 'package:bluejobs/jobhunter_screens/edit_post.dart';
-import 'package:bluejobs/utils/resume_form.dart';
+import 'package:bluejobs/jobhunter_screens/resume_form.dart';
 import 'package:bluejobs/jobhunter_screens/saved_post.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:bluejobs/screens_for_auth/edit_user_information.dart';
 import 'package:bluejobs/screens_for_auth/signin.dart';
+import 'package:bluejobs/styles/custom_button.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
 import 'package:bluejobs/styles/textstyle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -394,12 +395,14 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
   Widget buildResumeTab() {
     final userLoggedIn =
         Provider.of<auth_provider.AuthProvider>(context, listen: false);
-
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final User? user = auth.currentUser;
+    final String? uid = user?.uid;
     return FutureBuilder(
       future: fetchResumeData(userLoggedIn.uid),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          List<String> skills = snapshot.data ?? [];
+          final resumeData = snapshot.data as Map<String, dynamic>;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
             child: SizedBox(
@@ -423,25 +426,116 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
                   buildResumeItem('Email', userLoggedIn.userModel.email ?? ''),
                   buildResumeItem('Address', userLoggedIn.userModel.address),
                   const SizedBox(height: 20),
+                  // Add the resume details and uploaded files section
+                  Text('Resume Details',
+                      style: CustomTextStyle.typeRegularText.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: responsiveSize(context, 0.03))),
+                  const SizedBox(height: 10),
+                  // Display the experience description
+                  Text(
+                      'Experience Description: ${snapshot.data?['experienceDescription']}'),
+                  const SizedBox(height: 10),
+                  // Display the skills
+                  Text('Skills: ${snapshot.data?['skills']}'),
+                  const SizedBox(height: 10),
+                  // Display the education attainment
+                  Text(
+                      'Education Attainment: ${snapshot.data?['educationAttainment']}'),
+                  const SizedBox(height: 10),
+                  // Display the skill level
+                  Text('Skill Level: ${snapshot.data?['skillLevel']}'),
+                  const SizedBox(height: 10),
+                  // Display the uploaded files
+                  const Text('Uploaded Files:'),
+                  const SizedBox(height: 5),
+                  Column(
+                    children: [
+                      _buildFilePreviewList(snapshot.data),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10.0, top: 5.0),
-                    child: Text(
-                      'I am mostly good at!',
-                      style: CustomTextStyle.typeRegularText.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: responsiveSize(context, 0.03),
-                      ),
+                    child: CustomButton(
+                      onPressed: () async {
+                        try {
+                          Map<String, dynamic>? existingResumeData =
+                              await fetchResumeData(uid!);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ResumeForm(
+                                resumeData:
+                                    existingResumeData,
+                                isEditMode: existingResumeData !=
+                                    null, 
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          // handle error
+                        }
+                      },
+                      buttonText: 'Add/Edit Resume Details',
                     ),
-                  ),
-                  buildSpecializationChips(skills),
+                  )
                 ],
               ),
             ),
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
       },
+    );
+  }
+
+  Future<Map<String, dynamic>> fetchResumeData(String uid) async {
+    final firestore = FirebaseFirestore.instance;
+    final resumeRef =
+        firestore.collection("users").doc(uid).collection("resume").doc(uid);
+
+    final resumeSnap = await resumeRef.get();
+    if (resumeSnap.exists) {
+      return resumeSnap.data() as Map<String, dynamic>;
+    } else {
+      return {};
+    }
+  }
+
+  Widget _buildFilePreviewList(Map<String, dynamic>? data) {
+    if (data == null) {
+      return Text('No files uploaded');
+    }
+
+    return Column(
+      children: [
+        _buildFilePreview(data['policeClearanceUrl'], 'Police Clearance'),
+        _buildFilePreview(data['certificateUrl'], 'Certificate'),
+        _buildFilePreview(data['validIdUrl'], 'Valid ID'),
+      ],
+    );
+  }
+
+  Widget _buildFilePreview(String? url, String label) {
+    if (url == null) {
+      return Text('$label: Not uploaded');
+    }
+
+    return Row(
+      children: [
+        Text(label),
+        const SizedBox(width: 10),
+        url != null
+            ? Image.network(
+                url,
+                width: 100,
+                height: 100, 
+                fit: BoxFit.contain, 
+              )
+            : Container(), 
+      ],
     );
   }
 
@@ -464,20 +558,6 @@ class _JobHunterProfilePageState extends State<JobHunterProfilePage> {
         );
       }).toList(),
     );
-  }
-
-  Future<List<String>> fetchResumeData(String userId) async {
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final userRef = firestore.collection('users').doc(userId);
-      final userDoc = await userRef.get();
-      final skillsList = List<String>.from(userDoc.get('skills'));
-
-      return skillsList ?? [];
-    } catch (e) {
-      print('Error fetching resume data: $e');
-      return [];
-    }
   }
 
   Widget buildResumeItem(String title, String content) {

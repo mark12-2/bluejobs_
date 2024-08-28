@@ -84,7 +84,8 @@ class _AdminPanelState extends State<AdminPanel> {
 
   void _filterUsers(String query) {
     query = query.toLowerCase();
-    List<Map<String, dynamic>> filteredUsers = _allUsers.where((user) {
+    List<Map<String, dynamic>> filteredUsers =
+        _allUsers.where((user) => user['role'] != 'admin').where((user) {
       String fullName =
           '${user['firstName']} ${user['middleName']} ${user['lastName']}';
       return fullName.toLowerCase().contains(query) ||

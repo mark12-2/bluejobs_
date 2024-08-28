@@ -4,11 +4,8 @@ class Post {
   String? description;
   String? type;
   String? location;
-  String? rate;
   String? ownerId;
-  String? numberOfWorkers;
   String? startDate;
-  String? endDate;
   String? workingHours;
 
   Post({
@@ -17,11 +14,8 @@ class Post {
     this.description,
     this.type,
     this.location,
-    this.rate,
     this.ownerId,
-    this.numberOfWorkers,
     this.startDate,
-    this.endDate,
     this.workingHours,
   });
 
@@ -32,11 +26,8 @@ class Post {
       description: map['description'],
       type: map['type'],
       location: map['location'],
-      rate: map['rate'],
       ownerId: map['ownerId'],
-      numberOfWorkers: map['numberOfWorkers'],
       startDate: map['startDate'],
-      endDate: map['endDate'],
       workingHours: map['workingHours'],
     );
   }
@@ -47,11 +38,8 @@ class Post {
       'description': description,
       'type': type,
       'location': location,
-      'rate': rate,
       'ownerId': ownerId,
-      'numberOfWorkers': numberOfWorkers,
       'startDate': startDate,
-      'endDate': endDate,
       'workingHours': workingHours,
     };
   }

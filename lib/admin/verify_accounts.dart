@@ -1,16 +1,17 @@
-import 'package:bluejobs/admin/user_logs.dart';
+import 'package:bluejobs/admin/employer_acc.dart';
+import 'package:bluejobs/default_screens/view_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bluejobs/styles/custom_theme.dart';
 
-class ActivityLogs extends StatefulWidget {
-  const ActivityLogs({super.key});
+class Verifications extends StatefulWidget {
+  const Verifications({super.key});
 
   @override
-  State<ActivityLogs> createState() => _AvtivityLogsState();
+  State<Verifications> createState() => _VerificationsState();
 }
 
-class _AvtivityLogsState extends State<ActivityLogs> {
+class _VerificationsState extends State<Verifications> {
   final TextEditingController _userSearchController = TextEditingController();
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> _filteredUsers = [];
@@ -43,9 +44,13 @@ class _AvtivityLogsState extends State<ActivityLogs> {
         'uid': doc.get('uid') ?? '',
       };
     }).toList();
+
+    List<Map<String, dynamic>> filteredUsers =
+        allUsers.where((user) => user['role'] == 'Employer').toList();
+
     setState(() {
-      _allUsers = allUsers;
-      _filteredUsers = allUsers;
+      _allUsers = filteredUsers;
+      _filteredUsers = filteredUsers;
     });
   }
 
@@ -66,7 +71,7 @@ class _AvtivityLogsState extends State<ActivityLogs> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('User Management'),
+          title: const Text('User Verification Management'),
         ),
         body: Column(
           children: [
@@ -114,7 +119,8 @@ class _AvtivityLogsState extends State<ActivityLogs> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const UserLogs(),
+                                builder: (context) =>
+                                   EmployerVerify(userId: user['uid']),
                               ),
                             );
                           },

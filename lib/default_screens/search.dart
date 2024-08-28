@@ -37,25 +37,29 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _fetchUsers() async {
-    final usersRef = FirebaseFirestore.instance.collection('users');
-    final usersSnapshot = await usersRef.get();
-    List<Map<String, dynamic>> allUsers = usersSnapshot.docs.map((doc) {
-      return {
-        'id': doc.id,
-        'firstName': doc.get('firstName') ?? '',
-        'middleName': doc.get('middleName') ?? '',
-        'lastName': doc.get('lastName') ?? '',
-        'suffix': doc.get('suffix') ?? '',
-        'profilePic': doc.get('profilePic') ?? '',
-        'role': doc.get('role') ?? '',
-        'uid': doc.get('uid') ?? '',
-      };
-    }).toList();
-    setState(() {
-      _allUsers = allUsers;
-      _filteredUsers = allUsers;
-    });
-  }
+  final usersRef = FirebaseFirestore.instance.collection('users');
+  final usersSnapshot = await usersRef.get();
+  List<Map<String, dynamic>> allUsers = usersSnapshot.docs.map((doc) {
+    return {
+      'id': doc.id,
+      'firstName': doc.get('firstName') ?? '',
+      'middleName': doc.get('middleName') ?? '',
+      'lastName': doc.get('lastName') ?? '',
+      'suffix': doc.get('suffix') ?? '',
+      'profilePic': doc.get('profilePic') ?? '',
+      'role': doc.get('role') ?? '',
+      'uid': doc.get('uid') ?? '',
+    };
+  }).toList();
+
+  // Filter out users with role "admin"
+  List<Map<String, dynamic>> filteredUsers = allUsers.where((user) => user['role'] != 'admin').toList();
+
+  setState(() {
+    _allUsers = filteredUsers;
+    _filteredUsers = filteredUsers;
+  });
+}
 
   void _fetchPosts() async {
     final postsRef = FirebaseFirestore.instance.collection('Posts');

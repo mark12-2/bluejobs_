@@ -1,5 +1,7 @@
-import 'package:bluejobs/default_screens/view_profile.dart';
-import 'package:bluejobs/jobhunter_screens/details_view.dart';
+import 'package:bluejobs/employer_screens/workers_map.dart';
+import 'package:bluejobs/styles/custom_button.dart';
+import 'package:bluejobs/styles/responsive_utils.dart';
+import 'package:bluejobs/styles/textstyle.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,41 +13,6 @@ class FindOthersPage extends StatefulWidget {
 }
 
 class _FindOthersPageState extends State<FindOthersPage> {
-  final List<String> skills = [
-    "Carpentry",
-    "Plumbing",
-    "Sewing",
-    "Doing Laundry",
-    "Electrician",
-    "Mechanic",
-    "Construction Worker",
-    "Factory Worker",
-    "Welder",
-    "Painter",
-    "Landscaper",
-    "Janitor",
-    "HVAC Technician",
-    "Heavy Equipment Operator",
-    "Truck Driver",
-    "Roofer",
-    "Mason",
-    "Steelworker",
-    "Pipefitter",
-    "Boilermaker",
-    "Chef",
-    "Butcher",
-    "Baker",
-    "Fisherman",
-    "Miner",
-    "Housekeeper",
-    "Security Guard",
-    "Firefighter",
-    "Paramedic",
-    "Nursing Assistant",
-    "Retail Worker",
-    "Warehouse Worker"
-  ];
-
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> _filteredUsers = [];
@@ -89,82 +56,43 @@ class _FindOthersPageState extends State<FindOthersPage> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
+    final appBarColor = Color.fromARGB(255, 49, 92, 162);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Find Others'),
+        backgroundColor: appBarColor,
+        leading: IconButton(
+          icon:
+              const Icon(Icons.arrow_back, color: Color.fromARGB(255, 9, 5, 5)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Find Others',
+          style: CustomTextStyle.semiBoldText
+              .copyWith(fontSize: responsiveSize(context, 0.04)),
+        ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text.isEmpty) {
-                  return const Iterable<String>.empty();
-                }
-                return skills.where((skill) => skill
-                    .toLowerCase()
-                    .contains(textEditingValue.text.toLowerCase()));
-              },
-              onSelected: (String selection) {
-                _searchController.text = selection;
-                _filterUsersBySkill(selection);
-              },
-              fieldViewBuilder:
-                  (context, controller, focusNode, onEditingComplete) {
-                return TextField(
-                  controller: _searchController,
-                  focusNode: focusNode,
-                  decoration: InputDecoration(
-                    labelText: 'Search for a skill',
-                    border: const OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    _filterUsersBySkill(value);
-                  },
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: _filteredUsers.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No users available',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 120),
+            Center(
+              child: CustomButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NearWorkers(),
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: _filteredUsers.length,
-                    itemBuilder: (context, index) {
-                      var user = _filteredUsers[index];
-                      String fullName =
-                          '${user['firstName']} ${user['middleName']} ${user['lastName']} ${user['suffix']}';
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(user['profilePic']),
-                        ),
-                        title: Text(fullName),
-                        subtitle: Text(user['skills']),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  JobHunterResumeView(userId: user['uid']),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
+                  );
+                },
+                buttonText: 'Find workers near me',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
