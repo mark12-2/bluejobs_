@@ -2,7 +2,6 @@ import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/default_screens/comment.dart';
 import 'package:bluejobs/employer_screens/find_others.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
-import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:bluejobs/default_screens/notification.dart';
 import 'package:bluejobs/styles/textstyle.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 
 class EmployerHomePage extends StatefulWidget {

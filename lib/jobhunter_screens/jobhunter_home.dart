@@ -1,8 +1,8 @@
 import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/default_screens/comment.dart';
+import 'package:bluejobs/default_screens/view_post.dart';
 import 'package:bluejobs/jobhunter_screens/find_jobs.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
-import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:bluejobs/default_screens/notification.dart';
 import 'package:bluejobs/styles/textstyle.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 
 class JobHunterHomePage extends StatefulWidget {
@@ -25,8 +24,8 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   final ScrollController _scrollController = ScrollController();
-  bool _isApplied = false;
-  bool _isSaved = false;
+  // bool _isApplied = false;
+  // bool _isSaved = false;
 
   @override
   void dispose() {
@@ -175,19 +174,12 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
                       final post = posts[index];
 
                       String name = post['name'];
-
+                      String postId = post.id;
                       String userId = post['ownerId'];
                       String role = post['role'];
                       String profilePic = post['profilePic'] ?? '';
                       String title = post['title'] ?? '';
                       String description = post['description'];
-                      String type = post['type'];
-                      String location = post['location'] ?? '';
-                      String rate = post['rate'] ?? '';
-                      String numberOfWorkers = post['numberOfWorkers'] ?? '';
-                      String startDate = post['startDate'] ?? '';
-                      String endDate = post['endDate'] ?? '';
-                      String workingHours = post['workingHours'] ?? '';
 
                       return role == 'Employer'
                           ? Padding(
@@ -295,306 +287,55 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
                                         "$description",
                                         style: CustomTextStyle.regularText,
                                       ),
-                                      const SizedBox(height: 15),
-                                      role == 'Employer'
-                                          ? Row(
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: () async {
-                                                    final locations =
-                                                        await locationFromAddress(
-                                                            location);
-                                                    final lat =
-                                                        locations[0].latitude;
-                                                    final lon =
-                                                        locations[0].longitude;
-                                                    showLocationPickerModal(
-                                                        context,
-                                                        TextEditingController(
-                                                            text:
-                                                                '$lat, $lon'));
-                                                  },
-                                                  child: Text(
-                                                      "Location: $location",
-                                                      style: const TextStyle(
-                                                          color: Colors.blue)),
-                                                ),
-                                              ],
-                                            )
-                                          : Container(),
-                                      Text(
-                                        "Type of Job: $type",
-                                        style: CustomTextStyle.typeRegularText,
-                                      ),
-                                      role == 'Employer'
-                                          ? Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Workers Needed: $numberOfWorkers",
-                                                      style: CustomTextStyle
-                                                          .regularText,
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Rate: $rate",
-                                                      style: CustomTextStyle
-                                                          .regularText,
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Working Hours: $workingHours",
-                                                      style: CustomTextStyle
-                                                          .regularText,
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Start Date: $startDate",
-                                                      style: CustomTextStyle
-                                                          .regularText,
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "End Date: $endDate",
-                                                      style: CustomTextStyle
-                                                          .regularText,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            )
-                                          : Container(),
+
                                       const SizedBox(height: 20),
-                                      // comment section and like
+                                      // view more, next page
                                       Padding(
                                         padding: const EdgeInsets.all(10.0),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            const SizedBox(width: 5),
-                                            userId == auth.currentUser!.uid
-                                                ? Container()
-                                                : role == 'Employer'
-                                                    ? Expanded(
-                                                        child:
-                                                            FutureBuilder<bool>(
-                                                          future:
-                                                              _checkApplicationStatus(
-                                                                  post.id,
-                                                                  auth.currentUser!
-                                                                      .uid),
-                                                          builder: (context,
-                                                              snapshot) {
-                                                            bool isApplied =
-                                                                snapshot.data ??
-                                                                    false;
-                                                            return FutureBuilder<
-                                                                    bool>(
-                                                                future:
-                                                                    _isPostUnavailable(
-                                                                        post
-                                                                            .id),
-                                                                builder: (context,
-                                                                    postSnapshot) {
-                                                                  bool
-                                                                      isApplicationFull =
-                                                                      postSnapshot
-                                                                              .data ??
-                                                                          false;
-                                                                  return GestureDetector(
-                                                                    onTap: isApplied ||
-                                                                            isApplicationFull
-                                                                        ? null
-                                                                        : () async {
-                                                                            final notificationProvider =
-                                                                                Provider.of<NotificationProvider>(context, listen: false);
-                                                                            String
-                                                                                receiverId =
-                                                                                userId;
-                                                                            String
-                                                                                applicantName =
-                                                                                auth.currentUser!.displayName ?? 'Unknown';
-                                                                            String
-                                                                                applicantId =
-                                                                                auth.currentUser!.uid;
-
-                                                                            await notificationProvider.someNotification(
-                                                                              receiverId: receiverId,
-                                                                              senderId: auth.currentUser!.uid,
-                                                                              senderName: applicantName,
-                                                                              title: 'New Application',
-                                                                              notif: ', applied to your job entitled "$title"',
-                                                                            );
-                                                                            await Provider.of<PostsProvider>(context, listen: false).applyJob(
-                                                                              post.id,
-                                                                              title,
-                                                                              description,
-                                                                              userId,
-                                                                              name,
-                                                                            );
-
-                                                                            await Provider.of<PostsProvider>(context, listen: false).addApplicant(
-                                                                                post.id,
-                                                                                applicantId,
-                                                                                applicantName);
-
-                                                                            ScaffoldMessenger.of(context).showSnackBar(
-                                                                              const SnackBar(content: Text('Successfully applied')),
-                                                                            );
-
-                                                                            setState(() {
-                                                                              _isApplied = true;
-                                                                            });
-                                                                          },
-                                                                    child:
-                                                                        Container(
-                                                                      height:
-                                                                          53,
-                                                                      width:
-                                                                          165,
-                                                                      decoration:
-                                                                          BoxDecoration(
-                                                                        border:
-                                                                            Border.all(
-                                                                          color: isApplied || isApplicationFull
-                                                                              ? Colors.grey
-                                                                              : const Color.fromARGB(255, 7, 30, 47),
-                                                                          width:
-                                                                              2,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(5),
-                                                                        color: Colors
-                                                                            .white,
-                                                                      ),
-                                                                      child:
-                                                                          Center(
-                                                                        child:
-                                                                            Text(
-                                                                          isApplicationFull
-                                                                              ? 'Unavailable'
-                                                                              : postDetails.isJobPostAvailable
-                                                                                  ? (isApplied ? 'Applied' : 'Apply Job')
-                                                                                  : 'Apply Job',
-                                                                          style: CustomTextStyle
-                                                                              .regularText
-                                                                              .copyWith(
-                                                                            color: isApplied || isApplicationFull
-                                                                                ? Colors.grey
-                                                                                : const Color.fromARGB(255, 0, 0, 0),
-                                                                            fontSize:
-                                                                                responsiveSize(context, 0.03),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                });
-                                                          },
-                                                        ),
-                                                      )
-                                                    : Container(),
-                                            const SizedBox(width: 10),
-                                            userId == auth.currentUser!.uid
-                                                ? Container()
-                                                : role == 'Employer'
-                                                    ? Expanded(
-                                                        child:
-                                                            FutureBuilder<bool>(
-                                                          future:
-                                                              _isPostAlreadySaved(
-                                                                  post.id,
-                                                                  auth.currentUser!
-                                                                      .uid),
-                                                          builder: (context,
-                                                              snapshot) {
-                                                            bool isSaved =
-                                                                snapshot.data ??
-                                                                    false;
-                                                            return GestureDetector(
-                                                              onTap: isSaved
-                                                                  ? null
-                                                                  : () async {
-                                                                      final isSaved = await postDetails.isPostSaved(
-                                                                          post
-                                                                              .id,
-                                                                          auth.currentUser!
-                                                                              .uid);
-                                                                      if (!isSaved) {
-                                                                        await postDetails.savePost(
-                                                                            post.id,
-                                                                            auth.currentUser!.uid);
-                                                                        setState(
-                                                                            () {
-                                                                          _isSaved =
-                                                                              true;
-                                                                        });
-                                                                      }
-                                                                    },
-                                                              child: Container(
-                                                                height: 53,
-                                                                width: 165,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: isSaved
-                                                                        ? Colors
-                                                                            .grey
-                                                                        : Colors
-                                                                            .orange,
-                                                                    width: 2,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              5),
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    isSaved
-                                                                        ? 'Saved'
-                                                                        : 'Save for Later',
-                                                                    style: CustomTextStyle
-                                                                        .regularText
-                                                                        .copyWith(
-                                                                      color: isSaved
-                                                                          ? Colors
-                                                                              .grey
-                                                                          : const Color
-                                                                              .fromARGB(
-                                                                              255,
-                                                                              0,
-                                                                              0,
-                                                                              0),
-                                                                      fontSize: responsiveSize(
-                                                                          context,
-                                                                          0.03),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      )
-                                                    : Container(),
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ViewPostPage(
+                                                            postId: post.id),
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                height: 53,
+                                                width: 200,
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: const Color.fromARGB(
+                                                        255, 7, 30, 47),
+                                                    width: 2,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  color: Colors.white,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    'View More Details',
+                                                    style: CustomTextStyle
+                                                        .regularText
+                                                        .copyWith(
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              255, 0, 0, 0),
+                                                      fontSize: responsiveSize(
+                                                          context, 0.03),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
                                           ],
                                         ),
                                       ),
@@ -615,29 +356,29 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
     );
   }
 
-  Future<bool> _checkApplicationStatus(String postId, String userId) async {
-    final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
-    final postDoc = await postRef.get();
-    final applicants = postDoc.get('applicants') as List<dynamic>?;
-    return applicants != null && applicants.contains(userId);
-  }
+  // Future<bool> _checkApplicationStatus(String postId, String userId) async {
+  //   final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+  //   final postDoc = await postRef.get();
+  //   final applicants = postDoc.get('applicants') as List<dynamic>?;
+  //   return applicants != null && applicants.contains(userId);
+  // }
 
-  Future<bool> _isPostAlreadySaved(String postId, String userId) async {
-    final savedPostsRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('saved')
-        .doc(postId);
-    final savedPostsDoc = await savedPostsRef.get();
-    return savedPostsDoc.exists;
-  }
+  // Future<bool> _isPostAlreadySaved(String postId, String userId) async {
+  //   final savedPostsRef = FirebaseFirestore.instance
+  //       .collection('users')
+  //       .doc(userId)
+  //       .collection('saved')
+  //       .doc(postId);
+  //   final savedPostsDoc = await savedPostsRef.get();
+  //   return savedPostsDoc.exists;
+  // }
 
-  Future<bool> _isPostUnavailable(String postId) async {
-    final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
-    final postDoc = await postRef.get();
-    final isApplicationFull = postDoc.get('isApplicationFull') as bool?;
-    return isApplicationFull ?? false;
-  }
+  // Future<bool> _isPostUnavailable(String postId) async {
+  //   final postRef = FirebaseFirestore.instance.collection('Posts').doc(postId);
+  //   final postDoc = await postRef.get();
+  //   final isApplicationFull = postDoc.get('isApplicationFull') as bool?;
+  //   return isApplicationFull ?? false;
+  // }
 
   Future<void> _refresh() async {
     await Future.delayed(Duration(seconds: 1));

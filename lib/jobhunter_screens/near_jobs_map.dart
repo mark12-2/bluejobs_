@@ -13,7 +13,7 @@ class NearJobsPageMap extends StatefulWidget {
 
 class _NearJobsPageMapState extends State<NearJobsPageMap> {
   final List<Marker> _markers = [];
-  LatLng _userLocation = LatLng(13.1339, 123.7427); // Default location
+  late LatLng _userLocation;
   bool _isLoading = true;
 
   @override
@@ -31,15 +31,17 @@ class _NearJobsPageMapState extends State<NearJobsPageMap> {
             .doc(user.uid)
             .get();
         final data = userDoc.data();
-        if (data != null &&
-            data.containsKey('latitude') &&
-            data.containsKey('longitude')) {
-          setState(() {
-            _userLocation = LatLng(data['latitude'], data['longitude']);
-          });
+        if (data != null && data.containsKey('address')) {
+          final address = data['address'];
+          final coordinates = await _getCoordinatesFromAddress(address);
+          if (coordinates != null) {
+            setState(() {
+              _userLocation = coordinates;
+            });
+          }
         }
       }
-      await _loadPostMarkers(); 
+      await _loadPostMarkers();
     } catch (e) {
       print('Error loading user location: $e');
     } finally {

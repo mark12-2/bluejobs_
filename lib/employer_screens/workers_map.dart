@@ -1,10 +1,10 @@
+import 'package:bluejobs/default_screens/view_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:bluejobs/default_screens/view_profile.dart';
 
 class NearWorkers extends StatefulWidget {
   @override
@@ -13,8 +13,7 @@ class NearWorkers extends StatefulWidget {
 
 class _NearWorkersState extends State<NearWorkers> {
   final List<Marker> _markers = [];
-  LatLng _userLocation =
-      LatLng(13.1339, 123.7427); // Default to Albay, Philippines
+  late LatLng _userLocation;
   bool _isLoading = true;
 
   @override
@@ -32,15 +31,17 @@ class _NearWorkersState extends State<NearWorkers> {
             .doc(user.uid)
             .get();
         final data = userDoc.data();
-        if (data != null &&
-            data.containsKey('latitude') &&
-            data.containsKey('longitude')) {
-          setState(() {
-            _userLocation = LatLng(data['latitude'], data['longitude']);
-          });
+        if (data != null && data.containsKey('address')) {
+          final address = data['address'];
+          final coordinates = await _getCoordinatesFromAddress(address);
+          if (coordinates != null) {
+            setState(() {
+              _userLocation = coordinates;
+            });
+          }
         }
       }
-      await _loadPostMarkers(); // Load markers after fetching user location
+      await _loadPostMarkers();
     } catch (e) {
       print('Error loading user location: $e');
     } finally {

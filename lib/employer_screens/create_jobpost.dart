@@ -1,6 +1,5 @@
 import 'package:bluejobs/model/posts_model.dart';
 import 'package:bluejobs/navigation/employer_navigation.dart';
-import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
 import 'package:bluejobs/styles/custom_theme.dart';
 import 'package:bluejobs/styles/responsive_utils.dart';
@@ -147,22 +146,41 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                 ),
               ),
             const SizedBox(height: 20),
-            TextField(
-              controller: _typeController,
-              focusNode: _typeFocusNode,
-              decoration: customInputDecoration('Type of Job'),
-              maxLines: 10,
-              minLines: 1,
-              keyboardType: TextInputType.multiline,
-            ),
-            if (_isTypeFocused)
-              const Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Example: Contractual, Stay In Job, Project Based',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField(
+                  decoration: customInputDecoration('Type of Job'),
+                  focusNode: _typeFocusNode,
+                  value: _typeController.text.isEmpty
+                      ? null
+                      : _typeController.text,
+                  onChanged: (newValue) {
+                    setState(() {
+                      _typeController.text = newValue as String;
+                    });
+                  },
+                  items: [
+                    'Contractual Job',
+                    'Stay In Job',
+                    'Project Based',
+                  ].map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
+                    );
+                  }).toList(),
                 ),
-              ),
+                if (_isTypeFocused)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Example: Contractual, Stay In Job, Project Based',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(height: 20),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,15 +201,6 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ),
-                const SizedBox(height: 10),
-                // Center(
-                //   child: ElevatedButton(
-                //     onPressed: () =>
-                //         showLocationPickerModal(context, _locationController),
-                //     child: const Text('Show Location',
-                //         style: CustomTextStyle.regularText),
-                //   ),
-                // ),
               ],
             ),
             const SizedBox(height: 20),
@@ -234,22 +243,48 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                 ),
               ),
             const SizedBox(height: 20),
-            TextField(
-              controller: _workingHoursController,
-              focusNode: _workingHoursFocusNode,
-              decoration: customInputDecoration('Working Hours'),
-              maxLines: 10,
-              minLines: 1,
-              keyboardType: TextInputType.multiline,
-            ),
-            if (_isWorkingHoursFocused)
-              const Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Enter the working hours of the job. Example: 8am - 5pm',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField(
+                  decoration: customInputDecoration('Working Hours'),
+                  focusNode: _workingHoursFocusNode,
+                  value: _workingHoursController.text.isEmpty
+                      ? null
+                      : _workingHoursController.text, // initial value
+                  onChanged: (newValue) {
+                    setState(() {
+                      _workingHoursController.text = newValue as String;
+                    });
+                  },
+                  items: [
+                    '8am - 5pm',
+                    '9am - 6pm',
+                    '10am - 7pm',
+                    '7am - 3pm',
+                    '6am - 2pm',
+                    'Flexible',
+                    'Rotating Shifts',
+                    'Night Shift',
+                    'Morning Shift',
+                    'Afternoon Shift',
+                  ].map((hours) {
+                    return DropdownMenuItem(
+                      value: hours,
+                      child: Text(hours),
+                    );
+                  }).toList(),
                 ),
-              ),
+                if (_isWorkingHoursFocused)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Enter the working hours of the job.',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(height: 20),
             Row(
               children: [

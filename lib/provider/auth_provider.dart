@@ -24,6 +24,8 @@ class AuthProvider with ChangeNotifier {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
+  String get userId => _uid ?? '';
+
   User? getCurrentUser() {
     return _firebaseAuth.currentUser;
   }
