@@ -1,6 +1,6 @@
 import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/default_screens/comment.dart';
-import 'package:bluejobs/default_screens/find_others.dart';
+import 'package:bluejobs/employer_screens/find_others.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';

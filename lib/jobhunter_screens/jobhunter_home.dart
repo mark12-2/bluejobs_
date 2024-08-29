@@ -1,6 +1,6 @@
 import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/default_screens/comment.dart';
-import 'package:bluejobs/default_screens/find_others.dart';
+import 'package:bluejobs/jobhunter_screens/find_jobs.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
 import 'package:bluejobs/provider/mapping/location_service.dart';
 import 'package:bluejobs/provider/notifications/notifications_provider.dart';
@@ -135,7 +135,7 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const FindOthersPage()),
+                MaterialPageRoute(builder: (context) => const FindJobsPage()),
               );
             },
           )
@@ -179,16 +179,15 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
                       String userId = post['ownerId'];
                       String role = post['role'];
                       String profilePic = post['profilePic'] ?? '';
-                      String title = post['title'] ?? ''; 
+                      String title = post['title'] ?? '';
                       String description = post['description'];
                       String type = post['type'];
-                      String location = post['location'] ?? ''; 
-                      String rate = post['rate'] ?? ''; 
+                      String location = post['location'] ?? '';
+                      String rate = post['rate'] ?? '';
                       String numberOfWorkers = post['numberOfWorkers'] ?? '';
                       String startDate = post['startDate'] ?? '';
                       String endDate = post['endDate'] ?? '';
-                      String workingHours =
-                          post['workingHours'] ?? ''; 
+                      String workingHours = post['workingHours'] ?? '';
 
                       return role == 'Employer'
                           ? Padding(
