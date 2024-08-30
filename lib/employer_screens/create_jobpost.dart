@@ -1,3 +1,4 @@
+import 'package:bluejobs/employer_screens/job_posts_page.dart';
 import 'package:bluejobs/model/posts_model.dart';
 import 'package:bluejobs/navigation/employer_navigation.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
@@ -309,6 +310,16 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
                   onPressed: () => addJobPost(context),
                   child: const Text('Post'),
                 ),
+                const SizedBox(height: 50),
+                TextButton(
+                    child: const Text('Go to Job Posts History'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const JobPostsPage()),
+                      );
+                    }),
               ],
             )
           ],
