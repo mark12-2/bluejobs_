@@ -1,5 +1,6 @@
 import 'package:bluejobs/chats/messaging_roompage.dart';
 import 'package:bluejobs/default_screens/comment.dart';
+import 'package:bluejobs/default_screens/side_nav.dart';
 import 'package:bluejobs/default_screens/view_post.dart';
 import 'package:bluejobs/jobhunter_screens/find_jobs.dart';
 import 'package:bluejobs/default_screens/view_profile.dart';
@@ -46,17 +47,14 @@ class _JobHunterHomePageState extends State<JobHunterHomePage> {
     final FirebaseAuth auth = FirebaseAuth.instance;
 
     return Scaffold(
+      drawer: SideBar(),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 27, 74, 109),
-        leading: GestureDetector(
-          onTap: () {
-            _scrollController.animateTo(
-              0.0,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-            );
-          },
-          child: Image.asset('assets/images/bluejobs.png'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
         actions: <Widget>[
           Consumer<NotificationProvider>(
