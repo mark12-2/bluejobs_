@@ -1,3 +1,4 @@
+import 'package:bluejobs/employer_screens/job_posts_page.dart';
 import 'package:bluejobs/model/posts_model.dart';
 import 'package:bluejobs/navigation/jobhunter_navigation.dart';
 import 'package:bluejobs/provider/posts_provider.dart';
@@ -20,14 +21,11 @@ class _PostPageState extends State<PostPage> {
   // text controllers
   final _descriptionController = TextEditingController();
   final _typeController = TextEditingController();
-  // final _rateController = TextEditingController();
 
   final _descriptionFocusNode = FocusNode();
   final _typeFocusNode = FocusNode();
-  // final _rateFocusNode = FocusNode();
 
   bool _isDescriptionFocused = false;
-  // bool _isRateFocused = false;
   bool _isTypeFocused = false;
 
   @override
@@ -129,6 +127,16 @@ class _PostPageState extends State<PostPage> {
                   onPressed: () => createPost(context),
                   child: const Text('Post'),
                 ),
+                const SizedBox(height: 50),
+                TextButton(
+                    child: const Text('Go to Job Posts History'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const JobPostsPage()),
+                      );
+                    }),
               ],
             )
           ],
@@ -139,28 +147,29 @@ class _PostPageState extends State<PostPage> {
 
   //posting
   void createPost(BuildContext context) async {
-    if (_descriptionController.text.isNotEmpty &&
-        _typeController.text.isNotEmpty) {
-      String description = _descriptionController.text;
-      String type = _typeController.text;
-      // String rate = _rateController.text;
-      var postDetails = Post(
-        description: description,
-        type: type,
-        // rate: rate,
-      );
+  if (_descriptionController.text.isNotEmpty &&
+      _typeController.text.isNotEmpty) {
+    String description = _descriptionController.text;
+    String type = _typeController.text;
+    var postDetails = Post(
+      description: description,
+      type: type,
+    );
 
-      try {
-        await Provider.of<PostsProvider>(context, listen: false)
-            .addPost(postDetails);
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const JobhunterNavigation()),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create post: $e')),
-        );
-      }
+    try {
+      await Provider.of<PostsProvider>(context, listen: false)
+          .addPost(postDetails);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Post added successfully!')),
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const JobhunterNavigation()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create post: $e')),
+      );
     }
   }
+}
 }

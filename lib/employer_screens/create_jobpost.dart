@@ -354,6 +354,9 @@ class _CreateJobPostPageState extends State<CreateJobPostPage> {
       try {
         await Provider.of<PostsProvider>(context, listen: false)
             .addPost(jobPostDetails);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Job Post added successfully!')),
+        );
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const EmployerNavigation()),
         );

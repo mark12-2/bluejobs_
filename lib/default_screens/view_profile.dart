@@ -221,10 +221,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 String description = post['description'];
                 String type = post['type'];
                 String location = post['location'] ?? ''; // for job post
-                String rate = post['rate'] ?? ''; // for job post
-                String numberOfWorkers = post['numberOfWorkers'] ?? '';
+
                 String startDate = post['startDate'] ?? '';
-                String endDate = post['endDate'] ?? '';
+
                 String workingHours =
                     post['workingHours'] ?? ''; // for job post
 
@@ -311,32 +310,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             "Type of Job: $type",
                             style: CustomTextStyle.typeRegularText,
                           ),
-                          role == 'Employer'
-                              ? Text(
-                                  "Rate: $rate",
-                                  style: CustomTextStyle.regularText,
-                                )
-                              : Container(),
 
                           role == 'Employer'
                               ? Column(
                                   children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Workers Needed: $numberOfWorkers",
-                                          style: CustomTextStyle.regularText,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Rate: $rate",
-                                          style: CustomTextStyle.regularText,
-                                        ),
-                                      ],
-                                    ),
                                     Row(
                                       children: [
                                         Text(
@@ -349,14 +326,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                       children: [
                                         Text(
                                           "Start Date: $startDate",
-                                          style: CustomTextStyle.regularText,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "End Date: $endDate",
                                           style: CustomTextStyle.regularText,
                                         ),
                                       ],
@@ -760,19 +729,17 @@ class _ProfilePageState extends State<ProfilePage> {
         if (snapshot.hasData) {
           final userData = snapshot.data!.data() as Map<String, dynamic>;
           final rating = userData['rating'] ?? 0;
-          final ratingCount = userData['ratingCount'] ?? 0;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(10.0),
-            child: Container(
-              height: MediaQuery.of(context).size.height - 200,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RatingBar(
+          showRatingDialog() {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Rate this user'),
+                  content: RatingBar(
                     initialRating: rating.toDouble(),
                     direction: Axis.horizontal,
-                    allowHalfRating: true,
+                    allowHalfRating: false,
                     itemCount: 5,
                     ratingWidget: RatingWidget(
                       full: Icon(Icons.star, color: Colors.orange),
@@ -781,16 +748,31 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     onRatingUpdate: (rating) async {
                       await updateRating(rating, ratedUserId);
+                      Navigator.of(context).pop();
                     },
                   ),
-                  Text(
-                    'Your Rating: $rating',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  // Text(
-                  //   'Number of ratings: $ratingCount',
-                  //   style: TextStyle(fontSize: 16),
-                  // ),
+                );
+              },
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(10.0),
+            child: Container(
+              height: MediaQuery.of(context).size.height - 200,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Details',
+                      style: CustomTextStyle.typeRegularText.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: responsiveSize(context, 0.04))),
+                  const SizedBox(height: 10),
+                  buildResumeItem('Name', userData['firstName'] ?? ''),
+                  buildResumeItem(
+                      'Contact Number', userData['phoneNumber'] ?? ''),
+                  buildResumeItem('Sex', userData['sex'] ?? ''),
+                  buildResumeItem('Address', userData['address'] ?? ''),
                   StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection('users')
@@ -799,36 +781,52 @@ class _ProfilePageState extends State<ProfilePage> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: 5,
-                          itemBuilder: (context, index) {
-                            final rating = 5 - index;
-                            final ratingCount =
-                                snapshot.data!.docs.where((doc) {
-                              final ratingValue = doc.data()['stars'];
-                              return ratingValue.toInt() == rating;
-                            }).length;
+                        final ratings = snapshot.data!.docs;
+                        final rating = ratings.isEmpty
+                            ? 0
+                            : ratings
+                                    .map((doc) => doc.data()['stars'])
+                                    .reduce((a, b) => a + b) /
+                                ratings.length;
 
-                            return ListTile(
-                              title: Text(
-                                '$rating stars ($ratingCount)',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            );
-                          },
+                        return Column(
+                          children: [
+                            Text('Ratings',
+                                style: CustomTextStyle.typeRegularText.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: responsiveSize(context, 0.04))),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: 5,
+                              itemBuilder: (context, index) {
+                                final rating = 5 - index;
+                                final ratingCount = ratings.where((doc) {
+                                  final ratingValue = doc.data()['stars'];
+                                  return ratingValue.toInt() == rating;
+                                }).length;
+
+                                return ListTile(
+                                  title: Text(
+                                    '$rating stars ($ratingCount)',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                );
+                              },
+                            ),
+                            Text('Average Rating: $rating'),
+                            const SizedBox(height: 10),
+                            ElevatedButton(
+                              onPressed: showRatingDialog,
+                              child: Text('Rate this user'),
+                            ),
+                          ],
                         );
                       } else {
                         return const Center(child: CircularProgressIndicator());
                       }
                     },
                   ),
-                  const SizedBox(height: 20),
-                  buildResumeItem('Name', userData['firstName'] ?? ''),
-                  buildResumeItem(
-                      'Contact Number', userData['phoneNumber'] ?? ''),
-                  buildResumeItem('Sex', userData['sex'] ?? ''),
-                  buildResumeItem('Address', userData['address'] ?? ''),
                 ],
               ),
             ),
@@ -844,6 +842,23 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final ratedUserRef =
           FirebaseFirestore.instance.collection('users').doc(ratedUserId);
+      final ratingsRef = ratedUserRef.collection('ratings');
+
+      await ratingsRef
+          .where('raterId', isEqualTo: widget.userId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          ratingsRef.doc(doc.id).delete();
+        });
+      });
+
+      await ratingsRef.add({
+        'stars': rating,
+        'raterId': widget.userId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
       final ratedUserData =
           (await ratedUserRef.get()).data() as Map<String, dynamic>?;
       if (ratedUserData != null) {
@@ -853,7 +868,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
           await ratedUserRef.update({
             'totalRating': totalRating + rating - ratedUserData['rating'],
-            'ratingCount': ratingCount + 1,
+            'ratingCount': ratingCount,
             'rating': rating,
           });
         } else {
@@ -863,11 +878,6 @@ class _ProfilePageState extends State<ProfilePage> {
             'rating': rating,
           });
         }
-
-        await ratedUserRef.collection('ratings').add({
-          'stars': rating,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
       }
     } catch (e) {
       print('Error updating rating: $e');
