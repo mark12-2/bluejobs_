@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class SavedPostsPage extends StatefulWidget {
   final String userId;
 
-  const SavedPostsPage({required this.userId});
+  const SavedPostsPage({super.key, required this.userId});
 
   @override
   _SavedPostsPageState createState() => _SavedPostsPageState();
